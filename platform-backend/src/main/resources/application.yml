@@ -1,0 +1,10 @@
+server:
+  port: 9090
+  address: 192.168.0.1
+
+spring:
+  datasource:
+    username: root
+    password: root
+    url: jdbc:mysql://127.0.0.1:3306/test
+    driver-class-name: com.mysql.cj.jdbc.Driver
