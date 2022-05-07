@@ -1,218 +1,252 @@
 <template>
-
-    <el-menu
-        router
-        mode="horizontal"
-        style="height: 40px"
-    >
-      <el-sub-menu>
-        <template #title>项目</template>
-        <el-menu-item >项目一</el-menu-item>
-        <el-menu-item>项目二</el-menu-item>
-        <el-menu-item >项目三</el-menu-item>
-      </el-sub-menu>
+  <el-menu
+      router
+      mode="horizontal"
+      style="height: 40px"
+  >
+    <el-sub-menu>
+      <template #title>项目</template>
+      <el-menu-item >项目一</el-menu-item>
+      <el-menu-item>项目二</el-menu-item>
+      <el-menu-item >项目三</el-menu-item>
+    </el-sub-menu>
   </el-menu>
 
-  <el-card class="box-card">
-  <el-scrollbar>
-  <div>
-  <div style="border-left: #545c64 solid 4px">基础信息</div>
-  <el-form :inline="true" :model="form" label-width="120px">
-    <el-row :gutter="20">
-      <el-col :span="8">
-        <el-form-item label="名称">
-          <el-input v-model="form.name" />
-        </el-form-item>
-      </el-col>
-      <el-col :span="16">
-        <el-form-item label="请求">
-          <el-row>
-            <el-col :span="8">
-              <el-select v-model="form.request">
-                <el-option label="get" value="GET" />
-                <el-option label="post" value="POST" />
-                <el-option label="put" value="PUT" />
-                <el-option label="delete" value="DELETE" />
-                <el-option label="head" value="HEAD" />
-                <el-option label="patch" value="PATCH" />
-                <el-option label="options" value="OPTIONS" />
-                <el-option label="connect" value="CONNECT" />
-              </el-select>
-            </el-col>
-            <el-col :span="16">
-              <el-input v-model="form.url" />
-            </el-col>
-          </el-row>
-        </el-form-item>
-      </el-col>
-    </el-row>
-
-    <el-row :gutter="20">
-      <el-col :span="8">
-        <el-form-item label="责任人">
-          <el-input v-model="form.user" />
-        </el-form-item>
-      </el-col>
-      <el-col :span="8">
-        <el-form-item label="模块">
-          <el-input v-model="form.module" />
-        </el-form-item>
-      </el-col>
-      <el-col :span="8">
-        <el-form-item label="状态">
-          <el-input v-model="form.status" />
-        </el-form-item>
-      </el-col>
-    </el-row>
-
-    <el-row :gutter="20">
-      <el-col :span="8">
-        <el-form-item label="标签">
-          <el-input v-model="form.tag" />
-        </el-form-item>
-      </el-col>
-      <el-col :span="8">
-        <el-form-item label="描述">
-          <el-input
-              type="textarea"
-              autosize
-              v-model="form.desc">
+    <el-container style="height: calc(100vh - 90px); width: 100%" class="layout-container-demo">
+      <el-aside width="240px">
+        <el-scrollbar style="height: 100%">
+          <div class="down-tree">
+            <el-tree
+                :data="data"
+                :props="defaultProps"
+                node-key="id"
+                default-expand-all
+                :expand-on-click-node="false"
+                style="padding-top: 10px;overflow:auto;"
+                highlight-current
+            >
+              <template #default="{ node, data }">
+            <span class="custom-tree-node" >
+              <span
+                  v-if="!data.isEdit"
+                  @dblclick="() => {data.isEdit = true;}"
+              >{{ node.label }}</span>
+                 <el-input
+                     size="mini"
+                     ref="inputVal"
+                     v-if="data.isEdit"
+                     v-model.trim="data.label"
+                     @focus="focus($event, node)"
+                     @input="(a) => inp(a, data)"
+                     @blur="alters(node, data, $event)"
+                     v-focus
+                 >
           </el-input>
-        </el-form-item>
-      </el-col>
-    </el-row>
-  </el-form>
-  </div>
+            </span>
 
-  <div>
-  <div style="border-left: #545c64 solid 4px">请求内容</div>
-  <el-tabs v-model="activeName" @tab-click="handleClick">
-    <el-tab-pane label="请求参数" name="first">
-      <el-table :data="paramsData" @cell-dblclick="cellClick" stripe height="260px">
-        <el-table-column type="index" label="序号" width="100" align="center"></el-table-column>
-        <el-table-column property="key" label="键" width="150"  align="center">
-          <template v-slot:default="scope">
-            <el-input size="mini" v-model="scope.row.key" v-if="scope.row.flag1" @blur="inputClick(scope.row)" v-focus></el-input>
-            <span v-else>{{scope.row.key}}</span>
-          </template>
-        </el-table-column>
-        <el-table-column property="value" label="值" width="200" align="center">
-          <template v-slot:default="scope">
-            <el-input size="mini" v-model="scope.row.value" v-if="scope.row.flag2" @blur="inputClick(scope.row)" v-focus></el-input>
-            <span v-else>{{scope.row.value}}</span>
-          </template>
-        </el-table-column>
-        <el-table-column property="desc" label="描述" align="center">
-          <template v-slot:default="scope">
-            <el-input size="mini" v-model="scope.row.desc" v-if="scope.row.flag3" @blur="inputClick(scope.row)" v-focus></el-input>
-            <span v-else>{{scope.row.desc}}</span>
-          </template>
-        </el-table-column>
-      </el-table>
-    </el-tab-pane>
-    <el-tab-pane label="请求头" name="second">请求头</el-tab-pane>
-    <el-tab-pane label="请求体" name="third">
-      <el-radio-group v-model="radio">
-        <el-radio :label="1">form-data</el-radio>
-        <el-radio :label="2">x-www-form-urlencoded</el-radio>
-        <el-radio :label="3">json</el-radio>
-        <el-radio :label="4">xml</el-radio>
-        <el-radio :label="5">raw</el-radio>
-        <el-radio :label="6">binary</el-radio>
-      </el-radio-group>
+                <span>
+                  <el-icon @click="() => append(data)" color="#409EFC" class="no-inherit"><circle-plus /></el-icon>
+                  <el-icon v-if="node.label !== '全部用例'" @click="() => remove(node, data)" color="#409EFC" class="no-inherit"><delete /></el-icon>
 
-      <div>
-        <el-row :gutter="20">
-          <el-col :span="8">
-            <el-form-item label="键">
-              <el-input v-model="form.user" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="值">
-              <el-input v-model="form.module" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </div>
-    </el-tab-pane>
-    <el-tab-pane label="前置脚本" name="fourth">前置脚本</el-tab-pane>
-  </el-tabs>
-  </div>
+              </span>
+              </template>
+            </el-tree>
+          </div>
+        </el-scrollbar>
+      </el-aside>
 
-  <div>
-  <div style="border-left: #545c64 solid 4px">响应内容</div>
-  <el-row :gutter="10">
-    <el-col :span="8">
-      <span>响应码</span>
-    </el-col>
-    <el-col :span="8">
-      <span>响应时间</span>
-    </el-col>
-    <el-col :span="8">
-     <span>响应大小</span>
-    </el-col>
-  </el-row>
-    <el-tabs v-model="activeName2" @tab-click="handleClick">
-      <el-tab-pane label="响应体" name="first">响应体</el-tab-pane>
-      <el-tab-pane label="响应头" name="second">响应头</el-tab-pane>
-      <el-tab-pane label="控制台" name="third">控制台</el-tab-pane>
-      <el-tab-pane label="断言" name="fourth">断言</el-tab-pane>
-      <el-tab-pane label="提取" name="fifth">提取</el-tab-pane>
-      <el-tab-pane label="请求内容" name="sixth">请求内容</el-tab-pane>
-    </el-tabs>
-  </div>
-  </el-scrollbar>
-  </el-card>
+      <el-main height="calc(100vh - 500px)" style="width: 100% ;border-radius: 20px;box-shadow: 0 2px 12px 0 rgba(0,0,0,0.1);margin: 10px">
+        <el-tabs
+            v-model="editableTabsValue"
+            type="card"
+            class="demo-tabs"
+            @tab-remove="removeTab"
+        >
+          <el-tab-pane label="接口列表" :name="1">
+            <el-scrollbar>
+              <el-table :data="tableData" stripe height="calc(100vh - 170px)"  >
+                <el-table-column prop="ID" label="ID" width="120" />
+                <el-table-column prop="name" label="接口名称" width="120" />
+                <el-table-column prop="type" label="请求类型" width="120" />
+                <el-table-column prop="user" label="责任人" width="100"/>
+                <el-table-column prop="tag" label="标签" width="120"/>
+                <el-table-column prop="version" label="版本" width="120"/>
+                <el-table-column prop="utime" label="更新时间" width="140"/>
+                <el-table-column prop="ctime" label="创建时间" width="140"/>
+                <el-table-column prop="status" label="接口状态" width="120"/>
+                <el-table-column fixed="right" label="操作" width="120" :render-header="renderHeader">
+                  <template v-slot:default="scope">
+                    <el-button type="primary" circle  @click="addTab(editableTabsValue)">
+                      <el-icon style="vertical-align: middle;">
+                        <Edit/>
+                      </el-icon>
+                    </el-button>
+                    <el-popconfirm title="确定要删除吗?"
+                                   confirm-button-text="Yes"
+                                   cancel-button-text="No"
+                                   :icon="InfoFilled"
+                                   icon-color="red"
+                                   @confirm="deleteRow(scope.$index, tableData)"
+                                   @cancel="cancelEvent">
+                      <template #reference>
+                        <el-button type="danger" circle>
+                          <el-icon style="vertical-align: middle;">
+                            <Delete/>
+                          </el-icon>
+                        </el-button>
+                      </template>
+                    </el-popconfirm>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </el-scrollbar>
+          </el-tab-pane>
+          <el-tab-pane
+              v-for="item in editableTabs"
+              :key="item.name"
+              :label="item.title"
+              :name="item.name"
+              closable
+          >
+            <component :is="item.content" :ref="item.content" height="calc(100vh - 170px)" />
+          </el-tab-pane>
+        </el-tabs>
+
+      </el-main>
+    </el-container>
+
+
 </template>
 
 <script>
+import {
+  Delete,
+  Edit,
+  InfoFilled,
+  CirclePlus,
+} from '@element-plus/icons-vue'
+import InterfaceTestDetial from "@/components/InterfaceTest/InterfaceTestDetial";
+let id = 1000;
 export default {
   name: "InterfaceTest",
+  components:{
+    Delete,
+    Edit,
+    InfoFilled,
+    InterfaceTestDetial,
+    CirclePlus,
+  },
   data(){
+    const item = {
+      ID: '100001',
+      name: 'Test',
+      type:'get',
+      version: '2.0.1',
+      tag:' ',
+      user:'Tom',
+      utime:'2022-4-13',
+      ctime:'2022-4-13',
+      status:'已执行',
+    };
     return{
-      form:{
-        name: '',
-        request:'',
-        url:'',
-        tag:'',
-        module:'',
-        user:'',
-        status:'',
-        desc:''
+      data: [
+        {
+          id:1,
+          label: '全部用例',
+          children: [
+            {
+              id:2,
+              label: 'Interface 1-1',
+              isEdit:false,
+              children: [
+                {
+                  id:5,
+                  label: 'Interface 1-1-1',
+                  isEdit:false,
+                  children:[]
+                },
+              ],
+            },
+            {
+              id:3,
+              label: 'Function 2',
+              isEdit:false,
+              children: [
+                {
+                  id:6,
+                  label: 'Function 2-1',
+                  isEdit:false,
+                  children:[]
+                },
+                {
+                  id:7,
+                  label: 'Function 2-2',
+                  isEdit:false,
+                  children: [
+                    {
+                      id:11,
+                      label: 'Function 2-2-1',
+                      isEdit:false,
+                      children:[]
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              id:4,
+              label: 'Function 3',
+              isEdit:false,
+              children: [
+                {
+                  id:8,
+                  label: 'Function 3-1',
+                  isEdit:false,
+                  children: [
+                    {
+                      id:12,
+                      label: 'Function 3-1-1',
+                      isEdit:false,
+                      children:[]
+                    },
+                  ],
+                },
+                {
+                  id:9,
+                  label: 'Function 3-2',
+                  isEdit:false,
+                  children: [
+                    {
+                      id:13,
+                      label: 'Function 3-2-1',
+                      isEdit:false,
+                      children:[]
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+
+        },
+      ],
+      defaultProps: {
+        children: 'children',
+        label: 'label'
       },
-      activeName: 'first',
-      activeName2: 'first',
-      paramsData: [{
-        key: '步骤一',
-        flag1 : false,
-        flag2 : false,
-        flag3 : false,
-        value: '预期',
-        desc: '结果一'
+      tableData: Array(15).fill(item),
+      editableTabsValue: '2',
+      editableTabs: [{
+        title: 'Tab 1',
+        name: '2',
+        content: 'InterfaceTestDetial',
       }, {
-        key: '步骤二',
-        flag1 : false,
-        flag2 : false,
-        flag3 : false,
-        value: '预期',
-        desc: '结果二'
-      }, {
-        key: '步骤三',
-        flag1 : false,
-        flag2 : false,
-        flag3 : false,
-        value: '预期',
-        desc: '结果三'
-      }, {
-        key: '步骤四',
-        flag1 : false,
-        flag2 : false,
-        flag3 : false,
-        value: '预期',
-        desc: '结果四'
+        title: 'Tab 2',
+        name: '3',
+        content: 'InterfaceTestDetial',
       }],
-      radio: 1
+      tabIndex: 3
+
   }
   },
   directives: {
@@ -221,38 +255,156 @@ export default {
       // 指令的定义
       inserted: function (el) {
         // 聚焦元素
-        el.querySelector('input').focus()
+        el.querySelector('input').focus();
       }
     }
   },
   methods: {
-    handleClick(tab, event) {
-      console.log(tab, event);
+    focus(event, node) {
+      // 获取焦点
+      this.whetherEditNodeName = false;
+      event.target.value = node.label;
+      event.currentTarget.select();
     },
-    cellClick(row, column, cell, event){
-      switch (column.label) {
-        case '键':
-          row.flag1=true
-          break
-        case '值':
-          row.flag2=true
-          break
-        case '描述':
-          row.flag3=true
-        default: return
+    inp(value, data) {
+      console.log(data);
+      // 修改
+      this.whetherEditNodeName = true;
+      // 这里得加判断，如果输入空，就显示之前的值
+      if (value == "") {
+        data.label = data.data.label;
+      } else {
+        data.label = value;
       }
+    },
+    alters(node, data, event) {
+      // data里有节点名称，后端需要就传过去
+      if (this.whetherEditNodeName) {
+        // 调用后端修改nodeName的接口
+        // 这里加判断是为了避免，双击后没修改nodeName也会调接口的情况
+      }
+      data.isEdit = !data.isEdit;
+    },
+
+    append(data) {
+      const newChild = { id: id++, label: 'testtest', children: [],   isEdit: true, };
+      if (!data.children) {
+        this.$set(data, 'children', []);
+      }
+      data.children.push(newChild);
+    },
+
+    remove(node, data) {
+      const parent = node.parent;
+      const children = parent.data.children || parent.data;
+      const index = children.findIndex(d => d.id === data.id);
+      if(node.childNodes.length !== 0){
+        this.$message({
+          message: '该节点下存在子节点，不允许直接删除',
+          type: 'warning'
+        });
+        return;
+      }
+      children.splice(index, 1);
+    },
+    handleNodeClick(data) {
+      console.log(data);
+    },
+    deleteRow(index, rows) {
+      rows.splice(index, 1);
+    },
+
+    cancelEvent(){
 
     },
-    //input框失去焦点事件
-    inputClick(row){
-      row.flag1=false
-      row.flag2=false
-      row.flag3=false
+    renderHeader (h) {
+      return (
+          <div>
+            <span>操作</span>
+            <el-button
+                type="primary"
+                plain
+                style="padding:3px;margin-left:8px"
+                size="mini"
+                //加入点击事件---------
+                onClick={
+                  this.tableAddrow
+                }
+                //---------------------
+            >添加</el-button></div>
+      )
     },
+    tableAddrow(){
+      this.tableData.push({
+        ID: '未创建',
+        name: '未创建',
+        version: '',
+        tag:'',
+        type:'未知',
+        user:'',
+        utime:'',
+        ctime:'',
+        status:'',
+      })
+    },
+    addTab(targetName) {
+      let newTabName = ++this.tabIndex + '';
+      this.editableTabs.push({
+        title: 'New Tab',
+        name: newTabName,
+        content: 'InterfaceTestDetial'
+      });
+      this.editableTabsValue = newTabName;
+    },
+    removeTab(targetName) {
+      let tabs = this.editableTabs;
+      let activeName = this.editableTabsValue;
+      if (activeName === targetName) {
+        tabs.forEach((tab, index) => {
+          if (tab.name === targetName) {
+            let nextTab = tabs[index + 1] || tabs[index - 1];
+            if (nextTab) {
+              activeName = nextTab.name;
+            }else{
+              activeName = 1;
+            }
+          }
+        });
+      }
+      this.editableTabsValue = activeName;
+      this.editableTabs = tabs.filter(tab => tab.name !== targetName);
+
+    }
   }
 }
 </script>
 
-<style scoped>
-
+<style lang="less" scoped>
+.layout-container-demo .el-header {
+  position: relative;
+  background-color: #545c64;
+  color: var(--el-text-color-primary);
+}
+.layout-container-demo .el-aside {
+  color: var(--el-text-color-primary);
+  background: #545c64;
+}
+.layout-container-demo .el-menu {
+  border-right: none;
+}
+.layout-container-demo .el-main {
+  padding: 0;
+}
+.custom-tree-node {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  padding-right: 8px;
+}
+.down-tree /deep/ .el-tree-node.is-expanded > .el-tree-node__children {
+  display: inline;
+  min-width: 100%;
+}
 </style>

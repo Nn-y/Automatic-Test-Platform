@@ -10,9 +10,9 @@
       style="height: 50px"
   >
     <el-menu-item index="testTrack" :route="{path:'/TestTrack'}">测试跟踪</el-menu-item>
-    <el-menu-item index="1" :route="{path:'/functionTest'}" >功能测试</el-menu-item>
+<!--    <el-menu-item index="1" :route="{path:'/functionTest'}" >功能测试</el-menu-item>-->
     <el-menu-item index="interfaceTest" :route="{path:'/interfaceTest'}">接口测试</el-menu-item>
-    <el-menu-item index="3" :route="{path:'/performanceTest'}">性能测试</el-menu-item>
+<!--    <el-menu-item index="3" :route="{path:'/performanceTest'}">性能测试</el-menu-item>-->
     <el-sub-menu index="4" style="position: absolute;right: 0; height: 100%">
       <template #title >个人</template>
       <el-menu-item index="4-1">个人信息</el-menu-item>

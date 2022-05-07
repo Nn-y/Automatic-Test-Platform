@@ -5,5 +5,8 @@ import store from './store'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import '@/assets/css/global.css'
+import request from "@/utils/request";
+import axios from "axios";
 
-createApp(App).use(store).use(router).use(ElementPlus).mount('#app')
+const app = createApp(App).use(store).use(router).use(ElementPlus).mount('#app')
+app.prototype.axios = request()

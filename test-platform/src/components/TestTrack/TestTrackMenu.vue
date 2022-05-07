@@ -15,7 +15,7 @@
     </el-sub-menu>
     <el-menu-item index="testTrack" :route="{path:'/TestTrack/function'}">功能测试用例</el-menu-item>
     <el-menu-item index="2" :route="{path:'/TestTrack/interface'}">接口测试用例</el-menu-item>
-    <el-menu-item index="3" :route="{path:'/TestTrack/performance'}">性能测试用例</el-menu-item>
+<!--    <el-menu-item index="3" :route="{path:'/TestTrack/performance'}">性能测试用例</el-menu-item>-->
   </el-menu>
   <router-view></router-view>
 </template>

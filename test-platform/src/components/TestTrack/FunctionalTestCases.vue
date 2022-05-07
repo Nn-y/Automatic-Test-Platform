@@ -1,8 +1,45 @@
 <template>
   <el-container class="layout-container-demo" style="height: calc(100vh - 90px); width: 100%">
     <el-aside width="240px">
-      <el-scrollbar style="height:100% ;" >
-        <el-tree :data="data" :props="defaultProps" @node-click="handleNodeClick" style="padding-left: 30px; padding-top: 10px;" />
+      <el-scrollbar style="height: 100%">
+        <div class="down-tree">
+          <el-tree
+              :data="data"
+              :props="defaultProps"
+              node-key="id"
+              default-expand-all
+              :expand-on-click-node="false"
+              style="padding-top: 10px;overflow:auto;"
+              highlight-current
+              @node-click="nodeClick"
+          >
+            <template #default="{ node, data }">
+            <span class="custom-tree-node" >
+              <span
+                  v-if="!data.isEdit"
+                  @dblclick="() => {data.isEdit = true;}"
+              >{{ node.label }}</span>
+                 <el-input
+                     size="mini"
+                     ref="inputVal"
+                     v-if="data.isEdit"
+                     v-model.trim="data.label"
+                     @focus="focus($event, node)"
+                     @input="(a) => inp(a, data)"
+                     @blur="alters(node, data, $event)"
+                     v-focus
+                 >
+          </el-input>
+            </span>
+
+              <span>
+                  <el-icon @click="() => append(data)" color="#409EFC" class="no-inherit"><circle-plus /></el-icon>
+                  <el-icon v-if="node.label !== '全部用例'" @click="() => remove(node, data)" color="#409EFC" class="no-inherit"><delete /></el-icon>
+
+              </span>
+            </template>
+          </el-tree>
+        </div>
       </el-scrollbar>
     </el-aside>
 
@@ -11,22 +48,21 @@
 
         <el-scrollbar>
           <el-table :data="tableData" stripe height="calc(100vh - 110px)"  >
-            <el-table-column prop="ID" label="ID" width="120" />
+            <el-table-column prop="id" label="ID" width="120" />
             <el-table-column prop="name" label="名称" width="120" />
             <el-table-column prop="version" label="版本" width="120"/>
             <el-table-column prop="tag" label="标签" width="120"/>
             <el-table-column prop="module" label="所属模块" width="120" />
-            <el-table-column prop="project" label="所属项目" width="120"/>
             <el-table-column prop="bugs" label="缺陷" width="80"/>
             <el-table-column prop="user" label="执行人" width="100"/>
             <el-table-column prop="result" label="执行结果" width="100"/>
-            <el-table-column prop="utime" label="更新时间" width="140"/>
-            <el-table-column prop="ctime" label="创建时间" width="140"/>
+            <el-table-column prop="utime" label="更新时间" width="180"/>
+            <el-table-column prop="ctime" label="创建时间" width="180"/>
             <el-table-column prop="level" label="用例等级" width="120"/>
             <el-table-column prop="status" label="用例状态" width="120"/>
             <el-table-column fixed="right" label="操作" width="120" :render-header="renderHeader">
               <template v-slot:default="scope">
-                <el-button type="primary" circle  @click="dialogTableVisible = true">
+                <el-button type="primary" circle  @click="editCase(scope.$index)">
                   <el-icon style="vertical-align: middle;">
                     <Edit/>
                   </el-icon>
@@ -53,96 +89,11 @@
 
       </el-main>
       <el-dialog v-model="dialogTableVisible" :close-on-click-modal="false" width="70%" class="el-dialog">
-          <el-tabs type="border-card" style="height:400px">
-            <el-tab-pane label="信息">
-              <el-form :inline="true" :model="form2" label-width="120px">
-                <el-form-item label="ID">
-                  <el-input v-model="form2.id"/>
-                </el-form-item>
-                <el-form-item label="名称">
-                  <el-input v-model="form2.name" />
-                </el-form-item>
-                <el-form-item label="版本">
-                  <el-input v-model="form2.version" />
-                </el-form-item>
-                <el-form-item label="标签">
-                  <el-input v-model="form2.tag" />
-                </el-form-item>
-                <el-form-item label="所属模块">
-                  <el-input v-model="form2.module" />
-                </el-form-item>
-                <el-form-item label="所属项目">
-                  <el-input v-model="form2.project" />
-                </el-form-item><el-form-item label="缺陷">
-                <el-input v-model="form2.bugs" />
-              </el-form-item><el-form-item label="执行人">
-                <el-input v-model="form2.user" />
-              </el-form-item>
-                <el-form-item label="执行结果">
-                  <el-input v-model="form2.result" />
-                </el-form-item>
-                <el-form-item label="用例等级">
-                  <el-input v-model="form2.level" />
-                </el-form-item>
-                <el-form-item label="用例状态">
-                  <el-input v-model="form2.status" />
-                </el-form-item>
-
-              </el-form>
-
-            </el-tab-pane>
-
-            <el-tab-pane label="详情">
-              <el-form ref="form" :model="form" label-width="80px">
-                <el-form-item label="前置条件">
-                  <el-input type="textarea" v-model="form.pre"></el-input>
-                </el-form-item>
-              </el-form>
-
-              <el-scrollbar>
-                <el-table :data="gridData" @cell-dblclick="cellClick" stripe height="260px">
-                  <el-table-column type="index" label="序号" width="100" align="center"></el-table-column>
-                  <el-table-column property="steps" label="用例步骤" width="150"  align="center">
-                    <template v-slot:default="scope">
-                      <el-input size="mini" v-model="scope.row.steps" v-if="scope.row.flag1" @blur="inputClick(scope.row)" v-focus></el-input>
-                      <span v-else>{{scope.row.steps}}</span>
-                    </template>
-                  </el-table-column>
-                  <el-table-column property="expected" label="预期结果" width="200" align="center">
-                    <template v-slot:default="scope">
-                      <el-input size="mini" v-model="scope.row.expected" v-if="scope.row.flag2" @blur="inputClick(scope.row)" v-focus></el-input>
-                      <span v-else>{{scope.row.expected}}</span>
-                    </template>
-                  </el-table-column>
-                  <el-table-column property="actual" label="实际结果" align="center">
-                    <template v-slot:default="scope">
-                      <el-input size="mini" v-model="scope.row.actual" v-if="scope.row.flag3" @blur="inputClick(scope.row)" v-focus></el-input>
-                      <span v-else>{{scope.row.actual}}</span>
-                    </template>
-                  </el-table-column>
-                  <el-table-column property="action" label="操作" align="center">
-                    <template v-slot:default="scope">
-                      <el-button round  @click="addRow(scope.$index, gridData)">
-                        <el-icon style="vertical-align: middle;">
-                          <Plus/>
-                        </el-icon>
-                      </el-button>
-                      <el-button round  @click.native.prevent="deleteRow(scope.$index, gridData)">
-                        <el-icon style="vertical-align: middle;">
-                          <Delete/>
-                        </el-icon>
-                      </el-button>
-                    </template>
-                  </el-table-column>
-                </el-table>
-              </el-scrollbar>
-
-            </el-tab-pane>
-          </el-tabs>
+          <TestCasesEdit :msg="indexNum" ref="dialog"></TestCasesEdit>
 
           <template #footer>
             <span class="dialog-footer">
-              <el-button type="success" round  @click="dialogVisible = false">保存</el-button>
+              <el-button type="success" round  @click="save">保存</el-button>
             </span>
           </template>
 
@@ -157,137 +108,45 @@ import {
   Delete,
   Edit,
   InfoFilled,
+  CirclePlus,
+  EditPen
 } from '@element-plus/icons-vue'
 import {Plus} from "@element-plus/icons";
+import TestCasesEdit from "@/components/TestTrack/TestCasesEdit";
+import axios from "axios";
+import request from "@/utils/request";
+let id = 1000;
+let nodeId = 1;
+
+function tree(data, arr) {
+  arr.forEach(ele => {
+    if (ele.id === data.pid) {
+      ele.children.push({
+        id: data.id,
+        label: data.label,
+        children: []
+      })
+    } else {
+      tree(data, ele.children)
+    }
+  })
+}
 export default {
   name: "FunctionalTestCases",
   components: {
     Delete,
     Edit,
     Plus,
-    InfoFilled
+    InfoFilled,
+    CirclePlus,
+    EditPen,
+    TestCasesEdit
   },
   data() {
-    const item = {
-      ID: '100001',
-      name: 'Test',
-      version: '2.0.1',
-      tag:' ',
-      module:'无',
-      project:'项目一',
-      bugs:'0',
-      user:'Tom',
-      result:'successful',
-      utime:'2022-4-13',
-      ctime:'2022-4-13',
-      level:'P0',
-      status:'已执行',
-    };
     return {
-      tableData: Array(15).fill(item),
-      form:{
-        pre:'',
-      },
-      form2:{
-        id:'',
-        name: '',
-        version: '',
-        tag:'',
-        module:'',
-        project:'',
-        bugs:'',
-        user:'',
-        result:'',
-        level:'',
-        status:'',
-      },
-      dialogVisible: false,
-      data: [
-        {
-          label: 'Function',
-          children: [
-            {
-              label: 'Function 1-1',
-              children: [
-                {
-                  label: 'Function 1-1-1',
-                },
-              ],
-            },
-          ],
-        },
-        {
-          label: 'Function 2',
-          children: [
-            {
-              label: 'Function 2-1',
-              children: [
-                {
-                  label: 'Function 2-1-1',
-                },
-              ],
-            },
-            {
-              label: 'Function 2-2',
-              children: [
-                {
-                  label: 'Function 2-2-1',
-                },
-              ],
-            },
-          ],
-        },
-        {
-          label: 'Function 3',
-          children: [
-            {
-              label: 'Function 3-1',
-              children: [
-                {
-                  label: 'Function 3-1-1',
-                },
-              ],
-            },
-            {
-              label: 'Function 3-2',
-              children: [
-                {
-                  label: 'Function 3-2-1',
-                },
-              ],
-            },
-          ],
-        },
-      ],
-      gridData: [{
-        steps: '步骤一',
-        flag1 : false,
-        flag2 : false,
-        flag3 : false,
-        expected: '预期',
-        actual: '结果一'
-      }, {
-        steps: '步骤二',
-        flag1 : false,
-        flag2 : false,
-        flag3 : false,
-        expected: '预期',
-        actual: '结果二'
-      }, {
-        steps: '步骤三',
-        flag1 : false,
-        flag2 : false,
-        flag3 : false,
-        expected: '预期',
-        actual: '结果三'
-      }, {
-        steps: '步骤四',
-        flag1 : false,
-        flag2 : false,
-        flag3 : false,
-        expected: '预期',
-        actual: '结果四'
-      }],
+      tableData: [],
+      indexNum:'',
+      data:[],
       dialogTableVisible: false,
       defaultProps: {
         children: 'children',
@@ -305,47 +164,111 @@ export default {
       }
     }
   },
+  created(){
+    this.load()
+    axios.get("http://192.168.0.1:9090/functctree").then(res =>{
+      this.tree_init(res.data,this.data)
+    })
+
+  },
   methods: {
+    tree_init(data,arr) {
+        data.forEach(ele => {
+          if (!ele.pid) {
+            arr.push({
+              id: ele.id,
+              label: ele.label,
+              children: []
+            })
+          } else {
+            tree(ele, arr)
+          }
+        })
+        // console.log(arr)
+    },
+    nodeClick(data){
+      // console.log(data.id)
+      nodeId = data.id
+      axios.get("http://192.168.0.1:9090/functctree/nodeclick",{
+        params:{
+          id:data.id
+        }
+      }).
+      then(res =>{
+        this.tableData = res.data
+      })
+    },
+    load(){
+      axios.get("http://192.168.0.1:9090/functionInfo").then(res =>{
+        this.tableData = res.data
+      })
+    },
+    editCase(row){
+      this.dialogTableVisible = true
+      // console.log(this.tableData[row].id)
+      this.indexNum = this.tableData[row].id
+    },
+    focus(event, node) {
+      // 获取焦点
+      this.whetherEditNodeName = false;
+      event.target.value = node.label;
+      event.currentTarget.select();
+    },
+    inp(value, data) {
+      console.log(data);
+      // 修改
+      this.whetherEditNodeName = true;
+      // 这里得加判断，如果输入空，就显示之前的值
+      if (value == "") {
+        data.label = data.data.label;
+      } else {
+        data.label = value;
+      }
+    },
+    alters(node, data, event) {
+      // data里有节点名称，后端需要就传过去
+      if (this.whetherEditNodeName) {
+        // 调用后端修改nodeName的接口
+        // 这里加判断是为了避免，双击后没修改nodeName也会调接口的情况
+        axios.post("http://192.168.0.1:9090/functctree/update",JSON.parse(JSON.stringify(data)))
+      }
+      data.isEdit = !data.isEdit;
+    },
+
+    append(data) {
+      axios.get("http://192.168.0.1:9090/functctree/add",{
+        params:{
+          pid:data.id
+        }
+      }).
+      then(res =>{
+        this.data = []
+        this.tree_init(res.data,this.data)
+      })
+    },
+
+    remove(node, data) {
+      const parent = node.parent;
+      const children = parent.data.children || parent.data;
+      if(node.childNodes.length !== 0){
+        this.$message({
+          message: '该节点下存在子节点，不允许直接删除',
+          type: 'warning'
+        });
+        return;
+      }
+      axios.get("http://192.168.0.1:9090/functctree/del",{
+        params:{
+          id:data.id
+        }
+      }).
+      then(res =>{
+        this.data = []
+        this.tree_init(res.data,this.data)
+      })
+    },
     handleNodeClick(data) {
       console.log(data);
-    },
-    cellClick(row, column, cell, event){
-      switch (column.label) {
-        case '用例步骤':
-          row.flag1=true
-              break
-        case '预期结果':
-          row.flag2=true
-              break
-        case '实际结果':
-          row.flag3=true
-        default: return
-      }
-
-    },
-    //input框失去焦点事件
-    inputClick(row){
-      row.flag1=false
-      row.flag2=false
-      row.flag3=false
-    },
-    addRow(index,rows){
-      rows.splice(index+1, 0,
-          {
-            steps: '',
-            flag1 : false,
-            flag2 : false,
-            flag3 : false,
-            expected: '',
-            actual: ''
-          });
-    },
-    deleteRow(index, rows) {
-      rows.splice(index, 1);
-    },
-
-    cancelEvent(){
-
     },
     renderHeader (h) {
       return (
@@ -365,28 +288,40 @@ export default {
       )
     },
     tableAddrow(){
-      this.tableData.push({
-        ID: '未创建',
-        name: '未创建',
-        version: '',
-        tag:'',
-        module:'无',
-        project:'',
-        bugs:'0',
-        user:'',
-        result:'',
-        utime:'',
-        ctime:'',
-        level:'',
-        status:'',
+      axios.get("http://192.168.0.1:9090/funcInfoAddDefault",{
+        params:{
+          nodeId:nodeId
+        }
+      }).then(res =>{
+        this.tableData = res.data
       })
+    },
+    deleteRow(index, rows) {
+      let param = JSON.parse(JSON.stringify(rows[index]))
+      axios.post("http://192.168.0.1:9090/funcInfoDelete",param)
+      this.load()
+
+    },
+    cancelEvent(){
+
+    },
+    save(){
+      this.dialogTableVisible = false
+      let params = JSON.parse(JSON.stringify(this.$refs.dialog.form2))
+      let detial = JSON.parse(JSON.stringify(this.$refs.dialog.gridData))
+      // console.log(detial)
+      axios.post("http://192.168.0.1:9090/funcInfoUpdate",params)
+      axios.post("http://192.168.0.1:9090/funcdetialupdate",detial)
+
+      this.load()
+
     }
 
   }
 }
 </script>
 
-<style scoped>
+<style  lang="less" scoped>
 
 .layout-container-demo .el-header {
   position: relative;
@@ -402,6 +337,22 @@ export default {
 }
 .layout-container-demo .el-main {
   padding: 0;
+}
+.custom-tree-node {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  padding-right: 8px;
+}
+.down-tree /deep/ .el-tree-node.is-expanded > .el-tree-node__children {
+  display: inline;
+  min-width: 100%;
+}
+
+.show-hide:hover :nth-child(2) {
+  display: inline-block !important;
 }
 
 </style>
