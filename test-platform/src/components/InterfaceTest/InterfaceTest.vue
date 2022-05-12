@@ -4,12 +4,16 @@
       mode="horizontal"
       style="height: 40px"
   >
-    <el-sub-menu>
-      <template #title>项目</template>
-      <el-menu-item >项目一</el-menu-item>
-      <el-menu-item>项目二</el-menu-item>
-      <el-menu-item >项目三</el-menu-item>
-    </el-sub-menu>
+    <el-select v-model="project"  class="inputDeep"
+               style="width: 100px;margin-left: 20px;margin-top: 2px;"
+               @change="getProject">
+      <el-option
+          v-for="item in options"
+          :key="item.name"
+          :label="item.name"
+          :value="item.name">
+      </el-option>
+    </el-select>
   </el-menu>
 
     <el-container style="height: calc(100vh - 90px); width: 100%" class="layout-container-demo">
@@ -19,17 +23,20 @@
             <el-tree
                 :data="data"
                 :props="defaultProps"
+                ref="tree"
                 node-key="id"
                 default-expand-all
                 :expand-on-click-node="false"
                 style="padding-top: 10px;overflow:auto;"
+                :current-node-key="currentNode"
                 highlight-current
+                @node-click="nodeClick"
             >
               <template #default="{ node, data }">
             <span class="custom-tree-node" >
               <span
                   v-if="!data.isEdit"
-                  @dblclick="() => {data.isEdit = true;}"
+                  @dblclick="() => { data.isEdit = true;}"
               >{{ node.label }}</span>
                  <el-input
                      size="mini"
@@ -46,7 +53,21 @@
 
                 <span>
                   <el-icon @click="() => append(data)" color="#409EFC" class="no-inherit"><circle-plus /></el-icon>
-                  <el-icon v-if="node.label !== '全部用例'" @click="() => remove(node, data)" color="#409EFC" class="no-inherit"><delete /></el-icon>
+                   <el-popconfirm title="确定要删除吗?"
+                                  confirm-button-text="Yes"
+                                  cancel-button-text="No"
+                                  :icon="InfoFilled"
+                                  icon-color="red"
+                                  @confirm="remove(node, data)"
+                                  @cancel="cancelEvent">
+                    <template #reference>
+                      <el-icon v-if="node.label !== '全部用例'"
+                               color="#409EFC"
+                               class="no-inherit">
+                    <delete />
+                  </el-icon>
+                    </template>
+                  </el-popconfirm>
 
               </span>
               </template>
@@ -62,21 +83,21 @@
             class="demo-tabs"
             @tab-remove="removeTab"
         >
-          <el-tab-pane label="接口列表" :name="1">
+          <el-tab-pane label="接口列表" :name="0">
             <el-scrollbar>
               <el-table :data="tableData" stripe height="calc(100vh - 170px)"  >
-                <el-table-column prop="ID" label="ID" width="120" />
+                <el-table-column prop="id" label="ID" width="120" />
                 <el-table-column prop="name" label="接口名称" width="120" />
                 <el-table-column prop="type" label="请求类型" width="120" />
                 <el-table-column prop="user" label="责任人" width="100"/>
                 <el-table-column prop="tag" label="标签" width="120"/>
                 <el-table-column prop="version" label="版本" width="120"/>
-                <el-table-column prop="utime" label="更新时间" width="140"/>
-                <el-table-column prop="ctime" label="创建时间" width="140"/>
+                <el-table-column prop="utime" label="更新时间" width="180"/>
+                <el-table-column prop="ctime" label="创建时间" width="180"/>
                 <el-table-column prop="status" label="接口状态" width="120"/>
                 <el-table-column fixed="right" label="操作" width="120" :render-header="renderHeader">
                   <template v-slot:default="scope">
-                    <el-button type="primary" circle  @click="addTab(editableTabsValue)">
+                    <el-button type="primary" circle  @click="addTab(scope.$index)">
                       <el-icon style="vertical-align: middle;">
                         <Edit/>
                       </el-icon>
@@ -103,12 +124,12 @@
           </el-tab-pane>
           <el-tab-pane
               v-for="item in editableTabs"
-              :key="item.name"
+              :key="item.id"
               :label="item.title"
-              :name="item.name"
+              :name="item.id"
               closable
           >
-            <component :is="item.content" :ref="item.content" height="calc(100vh - 170px)" />
+            <component :is="item.content" :ref="item.content" :msg="item.id" height="calc(100vh - 170px)" />
           </el-tab-pane>
         </el-tabs>
 
@@ -126,7 +147,22 @@ import {
   CirclePlus,
 } from '@element-plus/icons-vue'
 import InterfaceTestDetial from "@/components/InterfaceTest/InterfaceTestDetial";
+import axios from "axios";
 let id = 1000;
+let nodeId;
+function tree(data, arr) {
+  arr.forEach(ele => {
+    if (ele.id === data.pid) {
+      ele.children.push({
+        id: data.id,
+        label: data.label,
+        children: []
+      })
+    } else {
+      tree(data, ele.children)
+    }
+  })
+}
 export default {
   name: "InterfaceTest",
   components:{
@@ -136,115 +172,57 @@ export default {
     InterfaceTestDetial,
     CirclePlus,
   },
-  data(){
-    const item = {
-      ID: '100001',
-      name: 'Test',
-      type:'get',
-      version: '2.0.1',
-      tag:' ',
-      user:'Tom',
-      utime:'2022-4-13',
-      ctime:'2022-4-13',
-      status:'已执行',
-    };
-    return{
-      data: [
-        {
-          id:1,
-          label: '全部用例',
-          children: [
-            {
-              id:2,
-              label: 'Interface 1-1',
-              isEdit:false,
-              children: [
-                {
-                  id:5,
-                  label: 'Interface 1-1-1',
-                  isEdit:false,
-                  children:[]
-                },
-              ],
-            },
-            {
-              id:3,
-              label: 'Function 2',
-              isEdit:false,
-              children: [
-                {
-                  id:6,
-                  label: 'Function 2-1',
-                  isEdit:false,
-                  children:[]
-                },
-                {
-                  id:7,
-                  label: 'Function 2-2',
-                  isEdit:false,
-                  children: [
-                    {
-                      id:11,
-                      label: 'Function 2-2-1',
-                      isEdit:false,
-                      children:[]
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              id:4,
-              label: 'Function 3',
-              isEdit:false,
-              children: [
-                {
-                  id:8,
-                  label: 'Function 3-1',
-                  isEdit:false,
-                  children: [
-                    {
-                      id:12,
-                      label: 'Function 3-1-1',
-                      isEdit:false,
-                      children:[]
-                    },
-                  ],
-                },
-                {
-                  id:9,
-                  label: 'Function 3-2',
-                  isEdit:false,
-                  children: [
-                    {
-                      id:13,
-                      label: 'Function 3-2-1',
-                      isEdit:false,
-                      children:[]
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
+  created(){
+    axios.get("http://192.168.0.1:9090/iftesttree",{
+      params:{
+        name:this.$store.state.project
+      }
+    }).then(res =>{
+      nodeId = res.data[0].id
+      this.currentNode = nodeId
+      this.$nextTick(function () {
+        this.$nextTick(() => {
+          this.$refs.tree.setCurrentKey(this.currentNode);
+        });
+      });
+      this.data = []
+      this.tree_init(res.data,this.data)
+      this.nodeLoad()
+    })
+  },
+  mounted() {
+    axios.get("http://192.168.0.1:9090/getprojects").then(res =>{
+      this.options = res.data
+      // console.log(res.data)
+      this.project = this.$store.state.project
+      // this.projectName = this.project
+      // this.$store.dispatch("asynChange",this.project)
 
-        },
-      ],
+    })
+  },
+  watch:{
+    editableTabsValue:function (nv,ov){
+      if(nv === "0"){
+        this.listLoad()
+      }
+    }
+  },
+
+  data(){
+
+    return{
+      options: [],
+      project: '',
+      // projectName:'',
+      data: [],
       defaultProps: {
         children: 'children',
         label: 'label'
       },
-      tableData: Array(15).fill(item),
-      editableTabsValue: '2',
-      editableTabs: [{
-        title: 'Tab 1',
-        name: '2',
-        content: 'InterfaceTestDetial',
-      }, {
-        title: 'Tab 2',
-        name: '3',
-        content: 'InterfaceTestDetial',
-      }],
+      currentNode: '',
+      tableData: [],
+      editableTabsValue: "0",
+      editableTabs: [],
       tabIndex: 3
 
   }
@@ -260,6 +238,73 @@ export default {
     }
   },
   methods: {
+    getProject(){
+      // this.projectName = this.project
+      this.$store.dispatch("asynChange",this.project)
+      axios.get("http://192.168.0.1:9090/iftesttree",{
+        params:{
+          name:this.project
+        }
+      }).then(res =>{
+        nodeId = res.data[0].id
+        this.currentNode = nodeId
+        this.$nextTick(function () {
+          this.$nextTick(() => {
+            this.$refs.tree.setCurrentKey(this.currentNode);
+          });
+        });
+        this.data = []
+        this.tree_init(res.data,this.data)
+        // console.log(res.data[0].id)
+        this.nodeLoad()
+        this.editableTabs = []
+      })
+    },
+    tree_init(data,arr) {
+      data.forEach(ele => {
+        if (!ele.pid) {
+          arr.push({
+            id: ele.id,
+            label: ele.label,
+            children: []
+          })
+        } else {
+          tree(ele, arr)
+        }
+      })
+      // console.log(arr)
+    },
+    nodeClick(data){
+      // console.log(data.id)
+      nodeId = data.id
+      this.nodeLoad()
+      // this.editableTabsValue = "0"
+
+    },
+    nodeLoad(){
+
+      axios.get("http://192.168.0.1:9090/iftesttree/nodeclick",{
+        params:{
+          id:nodeId
+        }
+      }).
+      then(res =>{
+        this.tableData = res.data
+        // console.log(this.tableData)
+      })
+      this.editableTabsValue = "0"
+    },
+    listLoad(){
+      axios.get("http://192.168.0.1:9090/iftesttree/nodeclick",{
+        params:{
+          id:nodeId
+        }
+      }).
+      then(res =>{
+        this.tableData = res.data
+        // console.log(this.tableData)
+      })
+    },
     focus(event, node) {
       // 获取焦点
       this.whetherEditNodeName = false;
@@ -282,36 +327,38 @@ export default {
       if (this.whetherEditNodeName) {
         // 调用后端修改nodeName的接口
         // 这里加判断是为了避免，双击后没修改nodeName也会调接口的情况
+        axios.post("http://192.168.0.1:9090/iftesttree/update",JSON.parse(JSON.stringify(data)))
       }
       data.isEdit = !data.isEdit;
     },
 
     append(data) {
-      const newChild = { id: id++, label: 'testtest', children: [],   isEdit: true, };
-      if (!data.children) {
-        this.$set(data, 'children', []);
-      }
-      data.children.push(newChild);
+      axios.get("http://192.168.0.1:9090/iftesttree/add",{
+        params:{
+          id:data.id,
+          name:this.$store.state.project
+        }
+      }).
+      then(res =>{
+        this.data = []
+        this.tree_init(res.data,this.data)
+      })
     },
 
     remove(node, data) {
-      const parent = node.parent;
-      const children = parent.data.children || parent.data;
-      const index = children.findIndex(d => d.id === data.id);
-      if(node.childNodes.length !== 0){
-        this.$message({
-          message: '该节点下存在子节点，不允许直接删除',
-          type: 'warning'
-        });
-        return;
-      }
-      children.splice(index, 1);
+      axios.get("http://192.168.0.1:9090/iftesttree/del",{
+        params:{
+          id:data.id,
+          name:this.$store.state.project
+        }
+      }).
+      then(res =>{
+        this.data = []
+        this.tree_init(res.data,this.data)
+      })
     },
     handleNodeClick(data) {
       console.log(data);
-    },
-    deleteRow(index, rows) {
-      rows.splice(index, 1);
     },
 
     cancelEvent(){
@@ -335,44 +382,53 @@ export default {
       )
     },
     tableAddrow(){
-      this.tableData.push({
-        ID: '未创建',
-        name: '未创建',
-        version: '',
-        tag:'',
-        type:'未知',
-        user:'',
-        utime:'',
-        ctime:'',
-        status:'',
+      axios.get("http://192.168.0.1:9090/ifListAddDefault",{
+        params:{
+          nodeId:nodeId
+        }
+      }).then(res =>{
+        this.tableData = res.data
       })
     },
-    addTab(targetName) {
-      let newTabName = ++this.tabIndex + '';
+    deleteRow(index, rows) {
+      axios.get("http://192.168.0.1:9090/ifListDelete", {
+        params:{
+          id:rows[index].id,
+          nodeId:nodeId
+        }
+      }).then(res=>{
+        this.tableData = res.data
+      })
+    },
+
+    addTab(row) {
+      // let newTabName = ++this.tabIndex + '';
       this.editableTabs.push({
-        title: 'New Tab',
-        name: newTabName,
+        title: this.tableData[row].name,
+        id: this.tableData[row].id,
         content: 'InterfaceTestDetial'
       });
-      this.editableTabsValue = newTabName;
+      this.editableTabsValue = this.tableData[row].id;
+
     },
     removeTab(targetName) {
       let tabs = this.editableTabs;
       let activeName = this.editableTabsValue;
       if (activeName === targetName) {
         tabs.forEach((tab, index) => {
-          if (tab.name === targetName) {
+          if (tab.id === targetName) {
             let nextTab = tabs[index + 1] || tabs[index - 1];
             if (nextTab) {
-              activeName = nextTab.name;
-            }else{
-              activeName = 1;
+              activeName = nextTab.id;
+            }else {
+              activeName = "0";
             }
           }
         });
       }
+
       this.editableTabsValue = activeName;
-      this.editableTabs = tabs.filter(tab => tab.name !== targetName);
+      this.editableTabs = tabs.filter(tab => tab.id !== targetName);
 
     }
   }
@@ -406,5 +462,18 @@ export default {
 .down-tree /deep/ .el-tree-node.is-expanded > .el-tree-node__children {
   display: inline;
   min-width: 100%;
+}
+
+.inputDeep  /deep/ .el-input__inner,/deep/ .el-select:hover:not(.el-select--disabled) .el-input__inner ,
+/deep/ .el-select .el-input.is-focus .el-input__inner,/deep/ .el-select .el-input__inner:focus
+{
+  -webkit-appearance: none;
+  background-color: #FFF;
+  background-image: none;
+  border-radius: 4px;
+  border: 0px;//改成0，边框就消失了！
+  box-shadow: none !important;
+  width: 100%;
+  //font-size:14px;
 }
 </style>

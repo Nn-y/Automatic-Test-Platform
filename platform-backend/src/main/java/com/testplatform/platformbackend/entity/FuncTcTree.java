@@ -4,6 +4,15 @@ public class FuncTcTree {
     int id;
     int pid;
     String label;
+    String project;
+
+    public String getProject() {
+        return project;
+    }
+
+    public void setProject(String project) {
+        this.project = project;
+    }
 
     public String getLabel() {
         return label;

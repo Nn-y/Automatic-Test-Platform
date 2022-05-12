@@ -6,10 +6,12 @@
           <el-tree
               :data="data"
               :props="defaultProps"
+              ref="tree"
               node-key="id"
               default-expand-all
               :expand-on-click-node="false"
               style="padding-top: 10px;overflow:auto;"
+              :current-node-key="currentNode"
               highlight-current
               @node-click="nodeClick"
           >
@@ -34,7 +36,21 @@
 
               <span>
                   <el-icon @click="() => append(data)" color="#409EFC" class="no-inherit"><circle-plus /></el-icon>
-                  <el-icon v-if="node.label !== '全部用例'" @click="() => remove(node, data)" color="#409EFC" class="no-inherit"><delete /></el-icon>
+                   <el-popconfirm title="确定要删除吗?"
+                                  confirm-button-text="Yes"
+                                  cancel-button-text="No"
+                                  :icon="InfoFilled"
+                                  icon-color="red"
+                                  @confirm="remove(node, data)"
+                                  @cancel="cancelEvent">
+                    <template #reference>
+                      <el-icon v-if="node.label !== '全部用例'"
+                               color="#409EFC"
+                               class="no-inherit">
+                    <delete />
+                  </el-icon>
+                    </template>
+                  </el-popconfirm>
 
               </span>
             </template>
@@ -89,7 +105,7 @@
 
       </el-main>
       <el-dialog v-model="dialogTableVisible" :close-on-click-modal="false" width="70%" class="el-dialog">
-          <TestCasesEdit :msg="indexNum" ref="dialog"></TestCasesEdit>
+          <TestCasesEdit :msg="indexNum" :type="func" ref="dialog"></TestCasesEdit>
 
           <template #footer>
             <span class="dialog-footer">
@@ -115,9 +131,10 @@ import {Plus} from "@element-plus/icons";
 import TestCasesEdit from "@/components/TestTrack/TestCasesEdit";
 import axios from "axios";
 import request from "@/utils/request";
+import useStore from 'vuex'
 let id = 1000;
-let nodeId = 1;
-
+let nodeId;
+// let param = this.$store.state.project
 function tree(data, arr) {
   arr.forEach(ele => {
     if (ele.id === data.pid) {
@@ -142,16 +159,22 @@ export default {
     EditPen,
     TestCasesEdit
   },
+  props:{
+    project:String
+  },
   data() {
     return {
       tableData: [],
       indexNum:'',
+      func:0,
       data:[],
       dialogTableVisible: false,
       defaultProps: {
         children: 'children',
         label: 'label'
-      }
+      },
+      currentNode: '',
+      param:''
     }
   },
   directives: {
@@ -165,11 +188,48 @@ export default {
     }
   },
   created(){
-    this.load()
-    axios.get("http://192.168.0.1:9090/functctree").then(res =>{
+    axios.get("http://192.168.0.1:9090/functctree",{
+      params:{
+        name:this.$store.state.project
+      }
+    }).then(res =>{
+      nodeId = res.data[0].id
+      this.currentNode = nodeId
+      this.$nextTick(function () {
+        this.$nextTick(() => {
+          this.$refs.tree.setCurrentKey(this.currentNode);
+        });
+      });
+      this.data = []
       this.tree_init(res.data,this.data)
+      this.nodeLoad()
     })
+  },
+  mounted() {
 
+  },
+  watch:{
+    project:function (nv,ov){
+      this.param = nv
+      // console.log(nv,ov)
+      axios.get("http://192.168.0.1:9090/functctree",{
+        params:{
+          name:this.param
+        }
+      }).then(res =>{
+        nodeId = res.data[0].id
+        this.currentNode = nodeId
+        this.$nextTick(function () {
+          this.$nextTick(() => {
+            this.$refs.tree.setCurrentKey(this.currentNode);
+          });
+        });
+        this.data = []
+        this.tree_init(res.data,this.data)
+        // console.log(res.data[0].id)
+        this.nodeLoad()
+      })
+    }
   },
   methods: {
     tree_init(data,arr) {
@@ -189,20 +249,21 @@ export default {
     nodeClick(data){
       // console.log(data.id)
       nodeId = data.id
+      this.nodeLoad()
+
+    },
+    nodeLoad(){
+
       axios.get("http://192.168.0.1:9090/functctree/nodeclick",{
         params:{
-          id:data.id
+          id:nodeId
         }
       }).
       then(res =>{
         this.tableData = res.data
       })
     },
-    load(){
-      axios.get("http://192.168.0.1:9090/functionInfo").then(res =>{
-        this.tableData = res.data
-      })
-    },
+
     editCase(row){
       this.dialogTableVisible = true
       // console.log(this.tableData[row].id)
@@ -238,7 +299,8 @@ export default {
     append(data) {
       axios.get("http://192.168.0.1:9090/functctree/add",{
         params:{
-          pid:data.id
+          id:data.id,
+          name:this.$store.state.project
         }
       }).
       then(res =>{
@@ -248,18 +310,10 @@ export default {
     },
 
     remove(node, data) {
-      const parent = node.parent;
-      const children = parent.data.children || parent.data;
-      if(node.childNodes.length !== 0){
-        this.$message({
-          message: '该节点下存在子节点，不允许直接删除',
-          type: 'warning'
-        });
-        return;
-      }
       axios.get("http://192.168.0.1:9090/functctree/del",{
         params:{
-          id:data.id
+          id:data.id,
+          name:this.$store.state.project
         }
       }).
       then(res =>{
@@ -297,9 +351,17 @@ export default {
       })
     },
     deleteRow(index, rows) {
-      let param = JSON.parse(JSON.stringify(rows[index]))
-      axios.post("http://192.168.0.1:9090/funcInfoDelete",param)
-      this.load()
+      // let param = JSON.parse(JSON.stringify(rows[index]))
+      // console.log(rows[index].id)
+      axios.get("http://192.168.0.1:9090/funcInfoDelete", {
+        params:{
+          id:rows[index].id,
+          nodeId:nodeId
+        }
+      }).then(res=>{
+        this.tableData = res.data
+      })
+      // this.nodeLoad()
 
     },
     cancelEvent(){
@@ -313,7 +375,7 @@ export default {
       axios.post("http://192.168.0.1:9090/funcInfoUpdate",params)
       axios.post("http://192.168.0.1:9090/funcdetialupdate",detial)
 
-      this.load()
+      this.nodeLoad()
 
     }
 

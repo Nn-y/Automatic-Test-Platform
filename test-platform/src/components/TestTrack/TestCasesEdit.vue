@@ -112,7 +112,8 @@ let param;
 export default {
   name: "TestCasesEdit",
   props:{
-    msg:Number
+    msg:Number,
+    type:Number
   },
   components:{
     Delete,
@@ -139,14 +140,22 @@ export default {
     }
   },
   created() {
-    this.load()
+    if(this.type === 0){
+      this.funcLoad()
+    }else {
+      this.ifLoad()
+    }
   },
   updated() {
-    this.load()
+    if(this.type === 0){
+      this.funcLoad()
+    }else {
+      this.ifLoad()
+    }
   },
   methods:{
 
-    load(){
+    funcLoad(){
       axios.get("http://192.168.0.1:9090/functionInfo/one",{
         params:{
           id:this.msg
@@ -165,6 +174,35 @@ export default {
         })
 
         axios.get("http://192.168.0.1:9090/funcpre",{
+          params:{
+            id:param
+          }
+        }).
+        then(res =>{
+          this.form = JSON.parse(JSON.stringify(res.data))
+          // console.log(JSON.parse(JSON.stringify(res.data)))
+        })
+      })
+    },
+    ifLoad(){
+      axios.get("http://192.168.0.1:9090/interfaceInfo/one",{
+        params:{
+          id:this.msg
+        }
+      }).then(res =>{
+        this.form2 = res.data
+        param = this.form2.id
+        // console.log(param)
+        axios.get("http://192.168.0.1:9090/ifdetial",{
+          params:{
+            id:param
+          }
+        }).
+        then(res =>{
+          this.gridData = res.data
+        })
+
+        axios.get("http://192.168.0.1:9090/ifpre",{
           params:{
             id:param
           }
@@ -197,21 +235,40 @@ export default {
       row.flag3=false
     },
     addRow(){
-      axios.get("http://192.168.0.1:9090/funcaddrow",{
-        params:{
-          id:param
-        }
-      }).
-      then(res =>{
-        this.gridData = res.data
-        // console.log(param)
-      })
+      if(this.type === 0){
+        axios.get("http://192.168.0.1:9090/funcaddrow",{
+          params:{
+            id:param
+          }
+        }).
+        then(res =>{
+          this.gridData = res.data
+          // console.log(param)
+        })
+      }else{
+        axios.get("http://192.168.0.1:9090/ifaddrow",{
+          params:{
+            id:param
+          }
+        }).
+        then(res =>{
+          this.gridData = res.data
+          // console.log(param)
+        })
+      }
+
     },
     deleteRow(index, rows) {
-      //rows.splice(index, 1);
-      axios.post("http://192.168.0.1:9090/funcdeleterow",JSON.parse(JSON.stringify(rows[index]))).then(res =>{
-        this.gridData = res.data
-      })
+      if(this.type === 0){
+        axios.post("http://192.168.0.1:9090/funcdeleterow",JSON.parse(JSON.stringify(rows[index]))).then(res =>{
+          this.gridData = res.data
+        })
+      }else {
+        axios.post("http://192.168.0.1:9090/ifdeleterow",JSON.parse(JSON.stringify(rows[index]))).then(res =>{
+          this.gridData = res.data
+        })
+      }
+
       // console.log(JSON.parse(JSON.stringify(rows[index])))
 
     },

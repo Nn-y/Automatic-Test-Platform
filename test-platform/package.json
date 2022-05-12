@@ -13,7 +13,7 @@
     "element-plus": "^2.1.9",
     "vue": "^3.2.13",
     "vue-router": "^4.0.3",
-    "vuex": "^4.0.0"
+    "vuex": "^4.0.2"
   },
   "devDependencies": {
     "@element-plus/icons": "^0.0.11",

@@ -61,12 +61,14 @@
                 <el-input
                     type="textarea"
                     autosize
-                    v-model="form.desc">
+                    v-model="form.describes">
                 </el-input>
               </el-form-item>
             </el-col>
           </el-row>
         </el-form>
+        <el-button type="success" round  @click="save" style="float: right;margin-right: 40px">保存</el-button>
+
       </div>
 
       <div style="margin-bottom: 20px">
@@ -206,10 +208,23 @@
 
 <script>
 import CodeEditor from '@/components/CodeEditor'
+import axios from "axios";
 export default {
   name: "InterfaceTestDetial",
   components:{
     CodeEditor
+  },
+  props:{
+    msg:Number
+  },
+  created() {
+    axios.get("http://192.168.0.1:9090/iflistdetial",{
+      params:{
+        id:this.msg
+      }
+    }).then(res=>{
+        this.form = res.data
+    })
   },
   data(){
     return{
@@ -217,16 +232,7 @@ export default {
       scriptContent:'',
       input:'',
       desctext:'',
-      form:{
-        name: '',
-        request:'',
-        url:'',
-        tag:'',
-        module:'',
-        user:'',
-        status:'',
-        desc:''
-      },
+      form:'',
       activeName: 'first',
       activeName2: 'first',
       paramsData: [{
@@ -272,6 +278,14 @@ export default {
     }
   },
   methods: {
+    save(){
+      let param = JSON.parse(JSON.stringify(this.form))
+      axios.post("http://192.168.0.1:9090/iflistdetial/save",param)
+      this.$message({
+        message: '保存成功！',
+        type: 'success'
+      });
+    },
     handleClick(tab, event) {
       console.log(tab, event);
     },
