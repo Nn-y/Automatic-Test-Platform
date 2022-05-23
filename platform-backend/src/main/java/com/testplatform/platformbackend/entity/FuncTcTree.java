@@ -4,13 +4,13 @@ public class FuncTcTree {
     int id;
     int pid;
     String label;
-    String project;
+    int project;
 
-    public String getProject() {
+    public int getProject() {
         return project;
     }
 
-    public void setProject(String project) {
+    public void setProject(int project) {
         this.project = project;
     }
 

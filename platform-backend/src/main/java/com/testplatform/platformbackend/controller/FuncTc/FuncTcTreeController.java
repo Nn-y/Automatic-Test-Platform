@@ -17,23 +17,23 @@ public class FuncTcTreeController {
 
     @ResponseBody
     @RequestMapping("/functctree")
-    public List<FuncTcTree> getTree(@RequestParam("name") String project){
+    public List<FuncTcTree> getTree(@RequestParam("projectId") int projectId){
 //        System.out.println(project);
-        return service.getTree(project);
+        return service.getTree(projectId);
     }
 
     @ResponseBody
     @RequestMapping("/functctree/add")
     public List<FuncTcTree> addTree(@RequestParam Map<String,String> map){
-        service.addTree(Integer.parseInt(map.get("id")),map.get("name"));
-        return service.getTree(map.get("name"));
+        service.addTree(Integer.parseInt(map.get("id")),Integer.parseInt(map.get("projectId")));
+        return service.getTree(Integer.parseInt(map.get("projectId")));
     }
 
     @ResponseBody
     @RequestMapping("/functctree/del")
     public List<FuncTcTree> deleteTree(@RequestParam Map<String,String> map){
         service.deleteTree(Integer.parseInt(map.get("id")));
-        return service.getTree(map.get("name"));
+        return service.getTree(Integer.parseInt(map.get("projectId")));
     }
 
     @ResponseBody

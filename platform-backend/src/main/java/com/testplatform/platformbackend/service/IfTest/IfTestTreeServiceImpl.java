@@ -15,13 +15,13 @@ public class IfTestTreeServiceImpl implements IfTestTreeService{
     @Autowired
     IfTestTreeDao ifTestTreeDao;
     @Override
-    public List<FuncTcTree> getTree(String project) {
-        return ifTestTreeDao.getTree(project);
+    public List<FuncTcTree> getTree(int projectId) {
+        return ifTestTreeDao.getTree(projectId);
     }
 
     @Override
-    public int addTree(int pid,String project) {
-        return ifTestTreeDao.addTree(pid,project);
+    public int addTree(int pid,int projectId) {
+        return ifTestTreeDao.addTree(pid,projectId);
     }
 
     @Override

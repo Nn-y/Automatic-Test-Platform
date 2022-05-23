@@ -1,7 +1,7 @@
 <template>
   <el-menu
       router
-      :default-active="$route.meta.name"
+      :default-active="defaultActive"
       class="el-menu-demo"
       mode="horizontal"
       style="height: 40px"
@@ -15,7 +15,7 @@
             v-for="item in options"
             :key="item.name"
             :label="item.name"
-            :value="item.name">
+            :value="item.id">
         </el-option>
 <!--        <el-option style="border-top: #ebeef5 solid 1px">-->
 <!--          <el-icon><plus /></el-icon>添加项目-->
@@ -31,8 +31,8 @@
 <!--      <el-menu-item divided><el-icon><plus /></el-icon>添加项目</el-menu-item>-->
 <!--    </el-sub-menu>-->
 
-    <el-menu-item index="testTrack" :route="{path:'/TestTrack/function'}">功能测试用例</el-menu-item>
-    <el-menu-item index="2" :route="{path:'/TestTrack/interface'}">接口测试用例</el-menu-item>
+    <el-menu-item index="function" :route="{path:'/TestTrack/function'}">功能测试用例</el-menu-item>
+    <el-menu-item index="interface" :route="{path:'/TestTrack/interface'}">接口测试用例</el-menu-item>
 <!--    <el-menu-item index="3" :route="{path:'/TestTrack/performance'}">性能测试用例</el-menu-item>-->
   </el-menu>
   <router-view :project="projectName"></router-view>
@@ -48,34 +48,73 @@ export default {
     Plus,ArrowDown,
   },
   name: "TestTrackMenu",
+  props:{
+    projectChange:Number,
+  },
   created() {
 
   },
   mounted() {
-    axios.get("http://192.168.0.1:9090/getprojects").then(res =>{
-      this.options = res.data
-      // console.log(res.data)
-      if(this.$store.state.project === ''){
-        this.project = this.options[0].name
-        this.$store.dispatch("asynChange",this.project)
-      }else{
-        this.project = this.$store.state.project
-      }
-      this.projectName = this.project
-
-    })
+    this.load()
   },
   data(){
     return{
       options: [],
       project: '',
-      projectName:'',
+      projectName:0,
+      projectId:0,
+      defaultActive:'function'
     }
   },
+  watch: {
+    $route: {
+      immediate: true,
+      handler(to) {
+        if (to.fullPath.endsWith('function')){
+          this.defaultActive = 'function' // 给defaultActive重新赋值为当前组件的路由地址
+        }else {
+          this.defaultActive = 'interface'
+        }
+      }
+    },
+    projectChange:function (nv,ov){
+      this.load()
+    }
+  },
+
   methods:{
-    getProject(){
-      this.projectName = this.project
-      this.$store.dispatch("asynChange",this.projectName)
+    load(){
+      axios.get("http://192.168.0.1:9090/getprojects",{
+        params:{
+          user:this.$store.state.user
+        }
+      }).then(res =>{
+        this.options = []
+        this.options = res.data
+        if(this.$store.state.project === 0){
+          console.log(this.options[0].id)
+          this.project = this.options[0].name
+          this.projectId = this.options[0].id
+          this.$store.dispatch("asynChange",this.projectId)
+        }else{
+          this.projectId = this.$store.state.project
+          axios.get("http://192.168.0.1:9090/getproject",{
+            params:{
+              projectId:this.projectId
+            }
+          }).then(res=>{
+            this.project = res.data
+          })
+        }
+        this.projectName = this.projectId
+
+      })
+    },
+    getProject(value){
+      this.projectId = value
+      this.projectName = this.projectId
+      // console.log(this.projectName)
+      this.$store.dispatch("asynChange",this.projectId)
     }
   }
 }

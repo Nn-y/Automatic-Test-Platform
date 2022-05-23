@@ -14,13 +14,13 @@ public class IfTcTreeServiceImpl implements IfTcTreeService{
     @Autowired
     IfTcTreeDao ifTcTreeDao;
     @Override
-    public List<FuncTcTree> getTree(String project) {
-        return ifTcTreeDao.getTree(project);
+    public List<FuncTcTree> getTree(int projectId) {
+        return ifTcTreeDao.getTree(projectId);
     }
 
     @Override
-    public int addTree(int pid,String project) {
-        return ifTcTreeDao.addTree(pid,project);
+    public int addTree(int pid,int projectId) {
+        return ifTcTreeDao.addTree(pid,projectId);
     }
 
     @Override

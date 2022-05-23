@@ -160,7 +160,7 @@ export default {
     TestCasesEdit
   },
   props:{
-    project:String
+    project:Number
   },
   data() {
     return {
@@ -174,7 +174,7 @@ export default {
         label: 'label'
       },
       currentNode: '',
-      param:''
+      param:0
     }
   },
   directives: {
@@ -190,10 +190,10 @@ export default {
   created(){
     axios.get("http://192.168.0.1:9090/functctree",{
       params:{
-        name:this.$store.state.project
+        projectId:this.$store.state.project
       }
     }).then(res =>{
-      nodeId = res.data[0].id
+      nodeId = parseInt(res.data[0].id)
       this.currentNode = nodeId
       this.$nextTick(function () {
         this.$nextTick(() => {
@@ -211,10 +211,11 @@ export default {
   watch:{
     project:function (nv,ov){
       this.param = nv
+      // console.log(this.project)
       // console.log(nv,ov)
       axios.get("http://192.168.0.1:9090/functctree",{
         params:{
-          name:this.param
+          projectId:this.param
         }
       }).then(res =>{
         nodeId = res.data[0].id
@@ -276,7 +277,7 @@ export default {
       event.currentTarget.select();
     },
     inp(value, data) {
-      console.log(data);
+      // console.log(data);
       // 修改
       this.whetherEditNodeName = true;
       // 这里得加判断，如果输入空，就显示之前的值
@@ -300,7 +301,7 @@ export default {
       axios.get("http://192.168.0.1:9090/functctree/add",{
         params:{
           id:data.id,
-          name:this.$store.state.project
+          projectId:this.$store.state.project
         }
       }).
       then(res =>{
@@ -313,7 +314,7 @@ export default {
       axios.get("http://192.168.0.1:9090/functctree/del",{
         params:{
           id:data.id,
-          name:this.$store.state.project
+          projectId:this.$store.state.project
         }
       }).
       then(res =>{

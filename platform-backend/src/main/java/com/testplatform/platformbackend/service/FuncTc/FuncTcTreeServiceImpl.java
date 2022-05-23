@@ -13,13 +13,13 @@ public class FuncTcTreeServiceImpl implements FuncTcTreeService{
     @Autowired
     FuncTcTreeDao funcTcTreeDao;
     @Override
-    public List<FuncTcTree> getTree(String project) {
-        return funcTcTreeDao.getTree(project);
+    public List<FuncTcTree> getTree(int projectId) {
+        return funcTcTreeDao.getTree(projectId);
     }
 
     @Override
-    public int addTree(int pid,String project) {
-        return funcTcTreeDao.addTree(pid,project);
+    public int addTree(int pid,int projectId) {
+        return funcTcTreeDao.addTree(pid,projectId);
     }
 
     @Override

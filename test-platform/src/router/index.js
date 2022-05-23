@@ -7,38 +7,65 @@ import TestTrackMenu from '../components/TestTrack/TestTrackMenu.vue'
 import FunctionTest from '../components/FunctionalTest/FunctionTest.vue'
 import PerformanceTest from '../components/PerformanceTest/PerformanceTest.vue'
 import InterfaceTest from '../components/InterfaceTest/InterfaceTest.vue'
+import Login from "@/components/Login";
+import Register from "@/components/Register";
 
 const routes = [
   {
     path: '/',
-    redirect:'/TestTrack/function',
+    component: Login,
+    meta:{
+      requiresAuth: false, // false表示不需要登录
+    }
+  },
+  {
+    path:'/Register',
+    component: Register,
+    meta:{
+      requiresAuth: false, // false表示不需要登录
+    }
+  },
+  {
+    path: '/Test',
+    redirect: '/TestTrack/function',
     component: Head,
-    children:[
+    meta:{
+      requiresAuth: true,
+    },
+    children: [
       {
         path: '/TestTrack',
-        redirect:'/TestTrack/function',
+        redirect: '/TestTrack/function',
         component: TestTrackMenu,
-        meta:{ name:"testTrack" },
+        meta: {name: "testTrack",
+          requiresAuth: true, },
 
-        children:[
+        children: [
 
           {
-            path:'/TestTrack/function',
+            path: '/TestTrack/function',
             component: FunctionalTestCases,
-            name:'function',
+            name: 'function',
+            meta:{
+              requiresAuth: true,
+            },
 
           },
           {
             path: '/TestTrack/interface',
             component: InterfaceTestCases,
-            name:'interface',
-
+            name: 'interface',
+            meta:{
+              requiresAuth: true,
+            },
           },
           {
             path: '/TestTrack/performance',
             component: PerformanceTestCases,
-            name:'performance',
-
+            name: 'performance',
+            meta:{
+              requiresAuth: true,
+            },
           }
 
         ]
@@ -46,20 +73,25 @@ const routes = [
       {
         path: '/functionTest',
         component: FunctionTest,
-        name:'functionTest'
-
+        name: 'functionTest',
+        meta:{
+          requiresAuth: true,
+        },
       },
       {
         path: '/performanceTest',
         component: PerformanceTest,
-        name:'performanceTest'
-
+        name: 'performanceTest',
+        meta:{
+          requiresAuth: true,
+        },
       },
       {
-        path:'/interfaceTest',
+        path: '/interfaceTest',
         component: InterfaceTest,
-        name:'interfaceTest',
-        meta:{ name:"interfaceTest" },
+        name: 'interfaceTest',
+        meta: {name: "interfaceTest",
+          requiresAuth: true,},
       }
 
     ]
@@ -70,6 +102,44 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes
+})
+
+// 路由拦截，判断是否需要登录
+
+router.beforeEach((to, from, next) => {
+
+  // 通过requiresAuth判断当前路由导航是否需要登录
+
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+
+    let token = sessionStorage.getItem('token')
+
+    console.log("token",token)
+
+    // 若需要登录访问，检查是否为登录状态
+
+    if (!token) {
+
+      next({
+
+        path: '/',
+
+        query: { redirect: to.fullPath }
+
+      })
+
+    } else {
+
+      next()
+
+    }
+
+  } else {
+
+    next() // 确保一定要调用 next()
+
+  }
+
 })
 
 export default router

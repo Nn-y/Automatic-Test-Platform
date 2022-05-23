@@ -158,7 +158,7 @@ export default {
     TestCasesEdit
   },
   props:{
-    project:String
+    project:Number
   },
   data() {
     return {
@@ -172,7 +172,7 @@ export default {
         label: 'label'
       },
       currentNode: '',
-      param:''
+      param:0
     }
   },
   directives: {
@@ -188,7 +188,7 @@ export default {
   created(){
     axios.get("http://192.168.0.1:9090/iftctree",{
       params:{
-        name:this.$store.state.project
+        projectId:this.$store.state.project
       }
     }).then(res =>{
       nodeId = res.data[0].id
@@ -214,7 +214,7 @@ export default {
       // console.log(nv,ov)
       axios.get("http://192.168.0.1:9090/iftctree",{
         params:{
-          name:this.param
+          projectId:this.param
         }
       }).then(res =>{
         nodeId = res.data[0].id
@@ -300,7 +300,7 @@ export default {
       axios.get("http://192.168.0.1:9090/iftctree/add",{
         params:{
           id:data.id,
-          name:this.$store.state.project
+          projectId:this.$store.state.project
         }
       }).
       then(res =>{
@@ -313,7 +313,7 @@ export default {
       axios.get("http://192.168.0.1:9090/iftctree/del",{
         params:{
           id:data.id,
-          name:this.$store.state.project
+          projectId:this.$store.state.project
         }
       }).
       then(res =>{

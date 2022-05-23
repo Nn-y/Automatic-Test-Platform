@@ -13,19 +13,26 @@
             <el-col :span="16">
               <el-form-item label="请求">
 
-                <el-input v-model="form.url">
+                <el-input v-model="form.domain" style="width: 300px"  placeholder="server name">
                   <template #prepend>
                     <el-select v-model="form.request" placeholder="Select" style="width: 110px">
                       <el-option label="get" value="GET" />
                       <el-option label="post" value="POST" />
-                      <el-option label="put" value="PUT" />
-                      <el-option label="delete" value="DELETE" />
-                      <el-option label="head" value="HEAD" />
-                      <el-option label="patch" value="PATCH" />
-                      <el-option label="options" value="OPTIONS" />
-                      <el-option label="connect" value="CONNECT" />
+<!--                      <el-option label="put" value="PUT" />-->
+<!--                      <el-option label="delete" value="DELETE" />-->
+<!--                      <el-option label="head" value="HEAD" />-->
+<!--                      <el-option label="patch" value="PATCH" />-->
+<!--                      <el-option label="options" value="OPTIONS" />-->
+<!--                      <el-option label="connect" value="CONNECT" />-->
                     </el-select>
+
                   </template>
+                </el-input>
+                <el-input style="width: 100px" placeholder="port"  v-model="form.port">
+
+                </el-input>
+                <el-input style="width: 200px" placeholder="path" v-model="form.path">
+
                 </el-input>
 
               </el-form-item>
@@ -95,110 +102,145 @@
                   <span v-else>{{scope.row.desc}}</span>
                 </template>
               </el-table-column>
+              <el-table-column property="action" label="操作" align="center">
+                <template #header>
+                  <span>操作</span>
+                  <el-button round style="margin-left:8px" @click="addRow()">
+                    <el-icon style="vertical-align: middle;">
+                      <Plus/>
+                    </el-icon>
+                  </el-button>
+                </template>
+                <template v-slot:default="scope">
+                      <el-button round @click="deleteRow(scope.$index,paramsData)">
+                        <el-icon style="vertical-align: middle;">
+                          <Delete/>
+                        </el-icon>
+                      </el-button>
+                </template>
+              </el-table-column>
             </el-table>
           </el-tab-pane>
-          <el-tab-pane label="请求头" name="second">
-            <el-row :gutter="20">
-              <el-col :span="6">
-                <el-input v-model="input" placeholder="键" />
-              </el-col>
-              <el-col :span="6">
-                <el-input v-model="input" placeholder="值" />
-              </el-col>
-            </el-row>
-          </el-tab-pane>
-          <el-tab-pane label="请求体" name="third">
-            <el-radio-group v-model="radio">
-              <el-radio :label="1">form-data</el-radio>
-              <el-radio :label="2">x-www-form-urlencoded</el-radio>
-              <el-radio :label="3">json</el-radio>
-              <el-radio :label="4">xml</el-radio>
-              <el-radio :label="5">raw</el-radio>
-              <el-radio :label="6">binary</el-radio>
-            </el-radio-group>
-            <div v-if="radio===1 || radio===2">
-              <el-row :gutter="20">
-                <el-col :span="6">
-                  <el-input v-model="input" placeholder="键" />
-                </el-col>
-                <el-col :span="6">
-                  <el-input v-model="input" placeholder="值" />
-                </el-col>
-              </el-row>
-              <el-row :gutter="20">
-                <el-col :span="6">
-                  <el-input v-model="input" placeholder="键" />
-                </el-col>
-                <el-col :span="6">
-                  <el-input v-model="input" placeholder="值" />
-                </el-col>
-              </el-row>
-            </div>
+<!--          <el-tab-pane label="请求头" name="second">-->
+<!--            <el-row :gutter="20">-->
+<!--              <el-col :span="6">-->
+<!--                <el-input v-model="input" placeholder="键" />-->
+<!--              </el-col>-->
+<!--              <el-col :span="6">-->
+<!--                <el-input v-model="input" placeholder="值" />-->
+<!--              </el-col>-->
+<!--            </el-row>-->
+<!--          </el-tab-pane>-->
+<!--          <el-tab-pane label="请求体" name="third">-->
+<!--            <el-radio-group v-model="radio">-->
+<!--              <el-radio :label="1">form-data</el-radio>-->
+<!--              <el-radio :label="2">x-www-form-urlencoded</el-radio>-->
+<!--              <el-radio :label="3">json</el-radio>-->
+<!--              <el-radio :label="4">xml</el-radio>-->
+<!--              <el-radio :label="5">raw</el-radio>-->
+<!--              <el-radio :label="6">binary</el-radio>-->
+<!--            </el-radio-group>-->
+<!--            <div v-if="radio===1 || radio===2">-->
+<!--              <el-row :gutter="20">-->
+<!--                <el-col :span="6">-->
+<!--                  <el-input v-model="input" placeholder="键" />-->
+<!--                </el-col>-->
+<!--                <el-col :span="6">-->
+<!--                  <el-input v-model="input" placeholder="值" />-->
+<!--                </el-col>-->
+<!--              </el-row>-->
+<!--              <el-row :gutter="20">-->
+<!--                <el-col :span="6">-->
+<!--                  <el-input v-model="input" placeholder="键" />-->
+<!--                </el-col>-->
+<!--                <el-col :span="6">-->
+<!--                  <el-input v-model="input" placeholder="值" />-->
+<!--                </el-col>-->
+<!--              </el-row>-->
+<!--            </div>-->
 
-            <div v-if="radio===3">
-              <code-editor ref="_firstRefs" class="editor h-100" v-model="editorContent"
-                           readonly language="json" theme="dracula"></code-editor>
-            </div>
+<!--            <div v-if="radio===3">-->
+<!--              <code-editor ref="_firstRefs" class="editor h-100" v-model="editorContent"-->
+<!--                           readonly language="json" theme="dracula"></code-editor>-->
+<!--            </div>-->
 
-            <div v-if="radio===4">
-              <code-editor ref="_firstRefs" class="editor h-100" v-model="editorContent"
-                           readonly language="xml" theme="dracula"></code-editor>
-            </div>
+<!--            <div v-if="radio===4">-->
+<!--              <code-editor ref="_firstRefs" class="editor h-100" v-model="editorContent"-->
+<!--                           readonly language="xml" theme="dracula"></code-editor>-->
+<!--            </div>-->
 
-            <div v-if="radio===5">
-              <code-editor ref="_firstRefs" class="editor h-100" v-model="editorContent"
-                           readonly language="raw" theme="dracula"></code-editor>
-            </div>
+<!--            <div v-if="radio===5">-->
+<!--              <code-editor ref="_firstRefs" class="editor h-100" v-model="editorContent"-->
+<!--                           readonly language="raw" theme="dracula"></code-editor>-->
+<!--            </div>-->
 
-            <div v-if="radio===6">
-              <el-row :gutter="20">
-                <el-col :span="6">
-                  <el-input
-                      type="text"
-                      placeholder="描述"
-                      v-model="desctext"
-                      maxlength="200"
-                      show-word-limit
-                  ></el-input>
-                </el-col>
-                <el-col :span="6">
-                  <el-upload
-                  >
-                    <el-button type="primary">上传文件</el-button>
+<!--            <div v-if="radio===6">-->
+<!--              <el-row :gutter="20">-->
+<!--                <el-col :span="6">-->
+<!--                  <el-input-->
+<!--                      type="text"-->
+<!--                      placeholder="描述"-->
+<!--                      v-model="desctext"-->
+<!--                      maxlength="200"-->
+<!--                      show-word-limit-->
+<!--                  ></el-input>-->
+<!--                </el-col>-->
+<!--                <el-col :span="6">-->
+<!--                  <el-upload-->
+<!--                  >-->
+<!--                    <el-button type="primary">上传文件</el-button>-->
 
-                  </el-upload>
-                </el-col>
-              </el-row>
-            </div>
-          </el-tab-pane>
+<!--                  </el-upload>-->
+<!--                </el-col>-->
+<!--              </el-row>-->
+<!--            </div>-->
+<!--          </el-tab-pane>-->
 
-          <el-tab-pane label="前置脚本" name="fourth">
-            <code-editor ref="_firstRefs" class="editor h-100" v-model="scriptContent"
-                         readonly language="java" theme="dracula"></code-editor>
-          </el-tab-pane>
+<!--          <el-tab-pane label="前置脚本" name="fourth">-->
+<!--            <ace></ace>-->
+<!--          </el-tab-pane>-->
         </el-tabs>
+        <el-button type="success" round  @click="execute" style="float: right;margin-right: 40px">执行</el-button>
       </div>
 
       <div>
         <div style="border-left: #545c64 solid 4px;margin-bottom: 10px">响应内容</div>
         <el-row :gutter="10">
           <el-col :span="8">
-            <span>响应码</span>
+            <span>响应码:{{code}}</span>
           </el-col>
           <el-col :span="8">
-            <span>响应时间</span>
+            <span>响应时间:{{time}}</span>
           </el-col>
           <el-col :span="8">
-            <span>响应大小</span>
+            <span>响应大小:{{size}}</span>
           </el-col>
         </el-row>
+<!--        <el-descriptions>-->
+<!--          <el-descriptions-item label="响应码:" v-model="code"></el-descriptions-item>-->
+<!--          <el-descriptions-item label="响应时间:" v-model="time"></el-descriptions-item>-->
+<!--          <el-descriptions-item label="响应大小:" v-model="size"></el-descriptions-item>-->
+<!--        </el-descriptions>-->
         <el-tabs v-model="activeName2" @tab-click="handleClick">
-          <el-tab-pane label="响应体" name="first">响应体</el-tab-pane>
-          <el-tab-pane label="响应头" name="second">响应头</el-tab-pane>
-          <el-tab-pane label="控制台" name="third">控制台</el-tab-pane>
-          <el-tab-pane label="断言" name="fourth">断言</el-tab-pane>
-          <el-tab-pane label="提取" name="fifth">提取</el-tab-pane>
-          <el-tab-pane label="请求内容" name="sixth">请求内容</el-tab-pane>
+          <el-tab-pane label="响应体" name="responseData" >
+            <div style="height: 300px;" >
+              <ace :value="responsedata" :key="refresh"></ace>
+            </div>
+          </el-tab-pane>
+          <el-tab-pane label="响应头" name="responseHeader">
+            <div style="height: 300px;" >
+<!--              <code-editor ref="_firstRefs" class="editor h-100" v-model="responseheader"-->
+<!--                           readonly language="json" theme="dracula"></code-editor>-->
+              <ace :value="responseheader" :key="refresh"></ace>
+              <!-- 只要对editScriptType赋值就可以使用对应语言的编辑器了 -->
+
+
+            </div>
+          </el-tab-pane>
+<!--          <el-tab-pane label="控制台" name="third">控制台</el-tab-pane>-->
+<!--          <el-tab-pane label="断言" name="fourth">断言</el-tab-pane>-->
+<!--          <el-tab-pane label="提取" name="fifth">提取</el-tab-pane>-->
+<!--          <el-tab-pane label="请求内容" name="sixth">请求内容</el-tab-pane>-->
         </el-tabs>
       </div>
 
@@ -208,11 +250,17 @@
 
 <script>
 import CodeEditor from '@/components/CodeEditor'
+import {
+  Delete,
+  Plus
+} from '@element-plus/icons-vue'
 import axios from "axios";
 export default {
   name: "InterfaceTestDetial",
   components:{
-    CodeEditor
+    CodeEditor,
+    Delete,
+    Plus
   },
   props:{
     msg:Number
@@ -224,7 +272,22 @@ export default {
       }
     }).then(res=>{
         this.form = res.data
-    })
+    }),
+        axios.get("http://192.168.0.1:9090/getparams",{
+          params:{
+            id:this.msg
+          }
+        }).then(res=>{
+          this.paramsData = res.data
+        })
+  },
+  watch:{
+    responseheader:function (nv,ov){
+      this.refresh= !this.refresh
+    },
+    responsedata:function (nv,ov){
+      this.refresh= !this.refresh
+    }
   },
   data(){
     return{
@@ -233,38 +296,16 @@ export default {
       input:'',
       desctext:'',
       form:'',
+      refresh:true,
       activeName: 'first',
-      activeName2: 'first',
-      paramsData: [{
-        key: '步骤一',
-        flag1 : false,
-        flag2 : false,
-        flag3 : false,
-        value: '预期',
-        desc: '结果一'
-      }, {
-        key: '步骤二',
-        flag1 : false,
-        flag2 : false,
-        flag3 : false,
-        value: '预期',
-        desc: '结果二'
-      }, {
-        key: '步骤三',
-        flag1 : false,
-        flag2 : false,
-        flag3 : false,
-        value: '预期',
-        desc: '结果三'
-      }, {
-        key: '步骤四',
-        flag1 : false,
-        flag2 : false,
-        flag3 : false,
-        value: '预期',
-        desc: '结果四'
-      }],
-      radio: 1
+      activeName2: 'responseData',
+      responsedata:'',
+      responseheader:'',
+      paramsData: [],
+      radio: 1,
+      code:'',
+      time:'',
+      size:''
     }
   },
   directives: {
@@ -281,13 +322,56 @@ export default {
     save(){
       let param = JSON.parse(JSON.stringify(this.form))
       axios.post("http://192.168.0.1:9090/iflistdetial/save",param)
+
       this.$message({
         message: '保存成功！',
         type: 'success'
       });
     },
+    execute(){
+      axios.get("http://192.168.0.1:9090/getrequest",{
+        params:{
+          id:this.msg
+        }
+      }).then(res=>{
+        axios.get("http://192.168.0.1:9090/getresponse", {
+          params: {
+            content: 'responseHeader'
+          }
+        }).then(res=>{
+          // console.log(JSON.parse(JSON.stringify(res.data)))
+          this.responseheader = res.data[0]
+        }),
+        axios.get("http://192.168.0.1:9090/getresponse", {
+          params: {
+            content: 'responseData'
+          }
+        }).then(res=>{
+          // console.log(JSON.parse(JSON.stringify(res.data)))
+          this.responsedata = res.data[0]
+        }),
+        axios.get("http://192.168.0.1:9090/getresponse/getbrief").then(res=>{
+          console.log(res.data[0])
+          this.code = res.data[0]
+          this.time = res.data[1]+' ms'
+          this.size = res.data[2]+' bytes'
+        })
+      })
+
+
+
+    },
     handleClick(tab, event) {
-      console.log(tab, event);
+
+      // axios.get("http://192.168.0.1:9090/getresponse",{
+      //   params:{
+      //     content:'responseHeader'
+      //   }.then(res=>{
+      //     console.log(res.data)
+      //     // this.responseheader = res.data
+      //   })
+      // })
+      // console.log(tab, event);
     },
     cellClick(row, column, cell, event){
       switch (column.label) {
@@ -308,7 +392,23 @@ export default {
       row.flag1=false
       row.flag2=false
       row.flag3=false
+      axios.post("http://192.168.0.1:9090/updateparams",JSON.parse(JSON.stringify(row)))
+      // console.log(JSON.parse(JSON.stringify(row)))
     },
+    addRow(){
+      axios.get("http://192.168.0.1:9090/addparams",{
+        params:{
+          id:this.msg
+        }
+      }).then(res=>{
+        this.paramsData = res.data
+      })
+    },
+    deleteRow(index,rows){
+      axios.post("http://192.168.0.1:9090/deleteparams",JSON.parse(JSON.stringify(rows[index]))).then(res=>{
+        this.paramsData = res.data
+      })
+    }
   }
 }
 </script>

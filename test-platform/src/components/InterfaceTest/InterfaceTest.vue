@@ -11,7 +11,7 @@
           v-for="item in options"
           :key="item.name"
           :label="item.name"
-          :value="item.name">
+          :value="item.id">
       </el-option>
     </el-select>
   </el-menu>
@@ -172,10 +172,13 @@ export default {
     InterfaceTestDetial,
     CirclePlus,
   },
+  props:{
+    projectChange:Number
+  },
   created(){
     axios.get("http://192.168.0.1:9090/iftesttree",{
       params:{
-        name:this.$store.state.project
+        projectId:this.$store.state.project
       }
     }).then(res =>{
       nodeId = res.data[0].id
@@ -191,20 +194,16 @@ export default {
     })
   },
   mounted() {
-    axios.get("http://192.168.0.1:9090/getprojects").then(res =>{
-      this.options = res.data
-      // console.log(res.data)
-      this.project = this.$store.state.project
-      // this.projectName = this.project
-      // this.$store.dispatch("asynChange",this.project)
-
-    })
+    this.load()
   },
   watch:{
     editableTabsValue:function (nv,ov){
       if(nv === "0"){
         this.listLoad()
       }
+    },
+    projectChange:function (nv,ov){
+      this.load()
     }
   },
 
@@ -213,6 +212,7 @@ export default {
     return{
       options: [],
       project: '',
+      projectId:0,
       // projectName:'',
       data: [],
       defaultProps: {
@@ -238,12 +238,32 @@ export default {
     }
   },
   methods: {
-    getProject(){
+    load(){
+      axios.get("http://192.168.0.1:9090/getprojects",{
+        params:{
+          user:this.$store.state.user
+        }
+      }).then(res =>{
+        this.options = []
+        this.options = res.data
+        // console.log(res.data)
+        this.projectId = this.$store.state.project
+        axios.get("http://192.168.0.1:9090/getproject",{
+          params:{
+            projectId:this.projectId
+          }
+        }).then(res=>{
+          this.project = res.data
+        })
+      })
+    },
+    getProject(value){
       // this.projectName = this.project
-      this.$store.dispatch("asynChange",this.project)
+      this.projectId = value
+      this.$store.dispatch("asynChange",this.projectId)
       axios.get("http://192.168.0.1:9090/iftesttree",{
         params:{
-          name:this.project
+          projectId:this.projectId
         }
       }).then(res =>{
         nodeId = res.data[0].id
@@ -336,7 +356,7 @@ export default {
       axios.get("http://192.168.0.1:9090/iftesttree/add",{
         params:{
           id:data.id,
-          name:this.$store.state.project
+          projectId:this.$store.state.project
         }
       }).
       then(res =>{
@@ -349,7 +369,7 @@ export default {
       axios.get("http://192.168.0.1:9090/iftesttree/del",{
         params:{
           id:data.id,
-          name:this.$store.state.project
+          projectId:this.$store.state.project
         }
       }).
       then(res =>{

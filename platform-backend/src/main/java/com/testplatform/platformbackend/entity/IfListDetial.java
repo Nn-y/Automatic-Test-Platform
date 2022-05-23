@@ -5,12 +5,31 @@ public class IfListDetial {
     private int id;
     private String name;
     private String request;
-    private String url;
+    private String domain;
     private String user;
     private String module;
     private String status;
     private String tag;
     private String describes;
+    private String port;
+    private String path;
+
+
+    public String getPort() {
+        return port;
+    }
+
+    public void setPort(String port) {
+        this.port = port;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
 
     public int getId() {
         return id;
@@ -36,12 +55,12 @@ public class IfListDetial {
         this.request = request;
     }
 
-    public String getUrl() {
-        return url;
+    public String getDomain() {
+        return domain;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setDomain(String domain) {
+        this.domain = domain;
     }
 
     public String getUser() {

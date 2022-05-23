@@ -18,14 +18,14 @@ public class IfTcTreeDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public List<FuncTcTree> getTree(String project){
+    public List<FuncTcTree> getTree(int projectId){
         String sql = "select * from interface_tree where project = ?";
-        return jdbcTemplate.query(sql,new BeanPropertyRowMapper(FuncTcTree.class),project);
+        return jdbcTemplate.query(sql,new BeanPropertyRowMapper(FuncTcTree.class),projectId);
     }
 
-    public int addTree(int pid,String project){
+    public int addTree(int pid,int projectId){
         String sql = "insert into interface_tree(pid,label,project) values(?,'无',?)";
-        return jdbcTemplate.update(sql,pid,project);
+        return jdbcTemplate.update(sql,pid,projectId);
     }
 
     public int deleteTree(int id){

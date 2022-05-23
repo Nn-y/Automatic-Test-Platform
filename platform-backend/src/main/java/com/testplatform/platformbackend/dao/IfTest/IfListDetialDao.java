@@ -21,9 +21,10 @@ public class IfListDetialDao {
     }
 
     public int save(IfListDetial detial){
-        String sql = "update if_list_detial set name = ?,request = ?,url = ?,user = ?," +
-                "module = ?,status = ?,tag = ?,describes = ? where id = ?";
-        return jdbcTemplate.update(sql,detial.getName(),detial.getRequest(),detial.getUrl(),detial.getUser(),
-                detial.getModule(),detial.getStatus(),detial.getTag(),detial.getDescribes(),detial.getId());
+        String sql = "update if_list_detial set name = ?,request = ?,domain = ?,user = ?," +
+                "module = ?,status = ?,tag = ?,describes = ?,port = ?,path = ? where id = ?";
+        return jdbcTemplate.update(sql,detial.getName(),detial.getRequest(),detial.getDomain(),detial.getUser(),
+                detial.getModule(),detial.getStatus(),detial.getTag(),detial.getDescribes(),
+                detial.getPort(),detial.getPath(),detial.getId());
     }
 }
