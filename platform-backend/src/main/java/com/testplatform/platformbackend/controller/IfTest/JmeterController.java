@@ -29,7 +29,7 @@ public class JmeterController {
     @ResponseBody
     @RequestMapping("/getrequest")
     public void getRequest(@RequestParam("id") int id) throws IOException, DocumentException {
-        File log = new File("D:\\ideaProjects\\platform-backend\\log.xml");
+        File log = new File("log.xml");
         FileWriter fileWriter = new FileWriter(log);
         fileWriter.write("");// 清空
         fileWriter.flush();

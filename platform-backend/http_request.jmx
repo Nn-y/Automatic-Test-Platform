@@ -80,7 +80,7 @@
                       <connectTime>true</connectTime>
                     </value>
                   </objProp>
-                  <stringProp name="filename">D:\ideaProjects\platform-backend\log.xml</stringProp>
+                  <stringProp name="filename">${logPath}</stringProp>
                 </ResultCollector>
         <hashTree/>
       </hashTree>

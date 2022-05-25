@@ -1,8 +1,7 @@
 <template>
-  <el-container>
-    <el-main style="display: flex;justify-content: center;">
-      <div style="margin-top: 200px;">
-        <el-form :model="form" :rules="rules" ref="form"  class="demo-ruleForm" style="width: 300px; ">
+  <div  class="loginPart">
+    <h2>用户登录</h2>
+        <el-form :model="form" :rules="rules" ref="form"  class="demo-ruleForm" style="width: 300px;margin-left: 25px">
           <el-form-item prop="name">
             <el-input v-model="form.name" placeholder="用户名" type="text"></el-input>
           </el-form-item>
@@ -15,9 +14,6 @@
           </el-form-item>
         </el-form>
       </div>
-
-    </el-main>
-  </el-container>
 
 </template>
 
@@ -59,7 +55,7 @@ export default {
               sessionStorage.setItem('token',this.form.name)
               this.$store.dispatch("asynShow",this.form.name)
               this.$store.dispatch("asynChange",0)
-              alert('submit!');
+              alert('登录成功!');
               this.$router.push({path:'/Test'})
             }else {
               this.$message.error('用户名或密码错误！');
@@ -80,5 +76,31 @@ export default {
 </script>
 
 <style scoped>
-
+.loginPart{
+  position:absolute;
+  /*定位方式绝对定位absolute*/
+  top:50%;
+  left:50%;
+  /*顶和高同时设置50%实现的是同时水平垂直居中效果*/
+  transform:translate(-50%,-50%);
+  /*实现块元素百分比下居中*/
+  width:450px;
+  padding:50px;
+  /*background: rgba(42, 41, 41, 0.5);*/
+  /*背景颜色为黑色，透明度为0.8*/
+  box-sizing:border-box;
+  /*box-sizing设置盒子模型的解析模式为怪异盒模型，
+  将border和padding划归到width范围内*/
+  /*box-shadow: 0px 15px 25px rgba(0,0,0,.5);*/
+  /*边框阴影  水平阴影0 垂直阴影15px 模糊25px 颜色黑色透明度0.5*/
+  /*border-radius:15px;*/
+  /*边框圆角，四个角均为15px*/
+}
+.loginPart h2{
+  margin: 0 0 30px;
+  padding: 0;
+  color: #545c64;
+  text-align: center;
+  /*文字居中*/
+}
 </style>

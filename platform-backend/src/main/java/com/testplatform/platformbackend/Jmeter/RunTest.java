@@ -20,6 +20,7 @@ import org.dom4j.Node;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
+import org.springframework.core.io.ClassPathResource;
 
 import java.io.*;
 import java.util.*;
@@ -30,15 +31,24 @@ public class RunTest {
         {
             //  JMeterUtils.setJMeterHome(new File("C:\\Users\\86182\\Desktop\\apache-jmeter-5.4.3").getAbsolutePath());
 
-            JMeterUtils.loadJMeterProperties(new File("D:\\Jmeter\\apache-jmeter-5.4.3\\bin/jmeter.properties").getAbsolutePath());
+//            JMeterUtils.loadJMeterProperties(new File("D:\\Jmeter\\apache-jmeter-5.4.3\\bin/jmeter.properties").getAbsolutePath());
+//
+//            JMeterUtils.setProperty("saveservice_properties", "D:\\Jmeter\\apache-jmeter-5.4.3\\bin/saveservice.properties");
+//
+//            JMeterUtils.setProperty("user_properties", "D:\\Jmeter\\apache-jmeter-5.4.3\\bin/user.properties");
+//
+//            JMeterUtils.setProperty("upgrade_properties", "D:\\Jmeter\\apache-jmeter-5.4.3\\bin/upgrade.properties");
+//
+//            JMeterUtils.setProperty("system_properties", "D:\\Jmeter\\apache-jmeter-5.4.3\\bin/system.properties");
+            JMeterUtils.loadJMeterProperties(new File("src/main/resources/Jmeter/jmeter.properties").getAbsolutePath());
 
-            JMeterUtils.setProperty("saveservice_properties", "D:\\Jmeter\\apache-jmeter-5.4.3\\bin/saveservice.properties");
+            JMeterUtils.setProperty("saveservice_properties", "src/main/resources/Jmeter/saveservice.properties");
 
-            JMeterUtils.setProperty("user_properties", "D:\\Jmeter\\apache-jmeter-5.4.3\\bin/user.properties");
+            JMeterUtils.setProperty("user_properties", "src/main/resources/Jmeter/user.properties");
 
-            JMeterUtils.setProperty("upgrade_properties", "D:\\Jmeter\\apache-jmeter-5.4.3\\bin/upgrade.properties");
+            JMeterUtils.setProperty("upgrade_properties", "src/main/resources/Jmeter/upgrade.properties");
 
-            JMeterUtils.setProperty("system_properties", "D:\\Jmeter\\apache-jmeter-5.4.3\\bin/system.properties");
+            JMeterUtils.setProperty("system_properties", "src/main/resources/Jmeter/system.properties");
 
             JMeterUtils.setProperty("proxy.cert.directory", new File("").getAbsolutePath());
 
@@ -53,19 +63,20 @@ public class RunTest {
     }
 
     public void test(MyRequest myRequest, List<RequestParams> params) throws IOException, DocumentException {
-        String root ="D:\\ideaProjects\\platform-backend";
+        String root =System.getProperty("user.dir");
 
         FileResourceLoader resourceLoader = new FileResourceLoader(root, "utf-8");
         Configuration cfg = Configuration.defaultConfiguration();
         GroupTemplate gt = new GroupTemplate(resourceLoader, cfg);
-        Template t = gt.getTemplate("/http_request.jmx");
+        Template t = gt.getTemplate("http_request.jmx");
 
         t.binding("domain",myRequest.getDomain());
         t.binding("port",myRequest.getPort());
         t.binding("path",myRequest.getPath());
         t.binding("method",myRequest.getMethod());
+        t.binding("logPath",root+File.separator+"log.xml");
 
-        String jmxFilePath = "D:\\ideaProjects\\platform-backend\\request.xml";
+        String jmxFilePath = "request.xml";
         OutputStream ops = new FileOutputStream(jmxFilePath);
         t.renderTo(ops);
 
@@ -84,7 +95,7 @@ public class RunTest {
         }
         String total = null;
         for(Map.Entry<String,String> entry:map.entrySet()){
-            System.out.println(entry.getKey());
+//            System.out.println(entry.getKey());
             String son = "<elementProp name=\""+entry.getKey()+"\" elementType=\"HTTPArgument\">\n"+
                     "<boolProp name=\"HTTPArgument.always_encode\">false</boolProp>\n"+
                     "<stringProp name=\"Argument.value\">"+entry.getValue()+"</stringProp>\n"+
@@ -118,7 +129,7 @@ public class RunTest {
 
     }
     //获取输入流
-    FileInputStream fis = new FileInputStream("D:\\ideaProjects\\platform-backend\\log.xml");
+    FileInputStream fis = new FileInputStream("log.xml");
 
     public List<String> getResponse(String content) throws DocumentException {
         //创建XML读取对象

@@ -16,6 +16,7 @@ public class UserController {
     @ResponseBody
     @RequestMapping("/register/isexist")
     public int isExist(@RequestParam String name){
+        System.out.println();
         return userService.isExist(name);
     }
 
