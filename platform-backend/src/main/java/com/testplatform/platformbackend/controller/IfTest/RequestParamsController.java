@@ -15,23 +15,27 @@ public class RequestParamsController {
 
     @ResponseBody
     @RequestMapping("/getparams")
+    @CrossOrigin
     public List<RequestParams> getParams(@RequestParam("id") int id){
         return service.getParams(id);
     }
     @ResponseBody
     @PostMapping("/test")
+    @CrossOrigin
     public List<RequestParams> test(@RequestParam("id") int id){
         return service.getParams(id);
     }
 
     @ResponseBody
     @PostMapping("/updateparams")
+    @CrossOrigin
     public void updateParams(@RequestBody RequestParams params){
         service.updateParams(params);
     }
 
     @ResponseBody
     @RequestMapping("/addparams")
+    @CrossOrigin
     public List<RequestParams> addRow(@RequestParam("id") int id){
         service.addRow(id);
         return service.getParams(id);
@@ -39,6 +43,7 @@ public class RequestParamsController {
 
     @ResponseBody
     @PostMapping("/deleteparams")
+    @CrossOrigin
     public List<RequestParams> deleteRow(@RequestBody RequestParams param){
         int id = param.getId();
         int xid = param.getXid();

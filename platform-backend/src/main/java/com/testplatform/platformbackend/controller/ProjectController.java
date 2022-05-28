@@ -16,18 +16,21 @@ public class ProjectController {
 
     @ResponseBody
     @RequestMapping("/getprojects")
+    @CrossOrigin
     public List<Project> getProjects(@RequestParam("user") String user){
         return service.getProjects(user);
     }
 
     @ResponseBody
     @RequestMapping("/getproject")
+    @CrossOrigin
     public String getProject(@RequestParam int projectId){
         return service.getProject(projectId);
     }
 
     @ResponseBody
     @RequestMapping("/addproject")
+    @CrossOrigin
     public List<Project> addProject(@RequestParam("user") String user){
         service.addProject(user);
         return service.getProjects(user);
@@ -35,6 +38,7 @@ public class ProjectController {
 
     @ResponseBody
     @RequestMapping("/delproject")
+    @CrossOrigin
     public List<Project> delProject(@RequestParam Map<String,String> map){
 //        System.out.println(map.get("id"));
         service.delProject(Integer.parseInt(map.get("id")));
@@ -43,6 +47,7 @@ public class ProjectController {
 
     @ResponseBody
     @PostMapping("/updateproject")
+    @CrossOrigin
     public void updateProject(@RequestBody List<Project> projects){
         service.updateProject(projects);
     }

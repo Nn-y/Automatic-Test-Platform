@@ -17,12 +17,14 @@ public class IfListDetialController {
 
     @ResponseBody
     @RequestMapping("/iflistdetial")
+    @CrossOrigin
     public IfListDetial getDetial(@RequestParam("id") int id){
         return service.getDetial(id);
     }
 
     @ResponseBody
     @PostMapping("/iflistdetial/save")
+    @CrossOrigin
     public int save(@RequestBody IfListDetial detial){
         ifListService.updateInfo(detial);
         return service.save(detial);

@@ -88,7 +88,7 @@ export default {
   },
   mounted() {
     this.user = this.$store.state.user
-    axios.get("http://192.168.0.1:9090/getprojects",{
+    axios.get("/api/getprojects",{
       params:{
         user:this.$store.state.user
       }
@@ -132,7 +132,7 @@ export default {
 
     },
     addRow(){
-      axios.get("http://192.168.0.1:9090/addproject",{
+      axios.get("/api/addproject",{
         params:{
           user:this.$store.state.user
         }
@@ -142,7 +142,7 @@ export default {
       })
     },
     deleteRow(index,rows){
-      axios.get("http://192.168.0.1:9090/delproject",{
+      axios.get("/api/delproject",{
         params:{
           id:rows[index].id,
           user:this.$store.state.user
@@ -155,7 +155,11 @@ export default {
     },
     save(){
       this.dialogTableVisible = false
-      axios.post("http://192.168.0.1:9090/updateproject",JSON.parse(JSON.stringify(this.gridData))).then(res=>{
+      axios.post("/api/updateproject",JSON.parse(JSON.stringify(this.gridData)),
+      {headers:{
+        'Content-Type': 'application/json;charset=utf-8',
+            'Accept': 'application/json',
+      },withCredentials: true, },).then(res=>{
         this.flag++
       })
     }

@@ -22,18 +22,21 @@ public class IfTcInfoController {
 
     @ResponseBody
     @RequestMapping("/interfaceInfo")
+    @CrossOrigin
     public List<FuncTcInfo> getAllInfo() {
         return service.getInfo();
     }
 
     @ResponseBody
     @RequestMapping("/interfaceInfo/one")
+    @CrossOrigin
     public FuncTcInfo getOneInfo(@RequestParam("id") int id){
         return service.getOneInfo(id);
     }
 
     @ResponseBody
     @RequestMapping("/ifInfoAddDefault")
+    @CrossOrigin
     public List<FuncTcInfo> addDefault(@RequestParam("nodeId") int nodeId){
         service.addDefault(nodeId);
         return ifTcTreeService.nodeClick(nodeId);
@@ -41,6 +44,7 @@ public class IfTcInfoController {
 
     @ResponseBody
     @PostMapping("/ifInfoUpdate")
+    @CrossOrigin
     //    name	version	tag	module	bugs	user	result	utime	ctime	level	status
     public int updateInfo(@RequestBody FuncTcInfo info){
         return service.updateInfo(info);
@@ -48,6 +52,7 @@ public class IfTcInfoController {
 
     @ResponseBody
     @RequestMapping("/ifInfoDelete")
+    @CrossOrigin
     public List<FuncTcInfo> deleteInfo(@RequestParam Map<String,String> map){
         int id = Integer.parseInt(map.get("id"));
         int nodeId = Integer.parseInt(map.get("nodeId"));

@@ -18,6 +18,7 @@ public class IfTcTreeController {
 
     @ResponseBody
     @RequestMapping("/iftctree")
+    @CrossOrigin
     public List<FuncTcTree> getTree(@RequestParam("projectId") int projectId){
 //        System.out.println(project);
         return service.getTree(projectId);
@@ -25,6 +26,7 @@ public class IfTcTreeController {
 
     @ResponseBody
     @RequestMapping("/iftctree/add")
+    @CrossOrigin
     public List<FuncTcTree> addTree(@RequestParam Map<String,String> map){
         service.addTree(Integer.parseInt(map.get("id")),Integer.parseInt(map.get("projectId")));
         return service.getTree(Integer.parseInt(map.get("projectId")));
@@ -32,6 +34,7 @@ public class IfTcTreeController {
 
     @ResponseBody
     @RequestMapping("/iftctree/del")
+    @CrossOrigin
     public List<FuncTcTree> deleteTree(@RequestParam Map<String,String> map){
         service.deleteTree(Integer.parseInt(map.get("id")));
         return service.getTree(Integer.parseInt(map.get("projectId")));
@@ -39,6 +42,7 @@ public class IfTcTreeController {
 
     @ResponseBody
     @PostMapping("/iftctree/update")
+    @CrossOrigin
     public List<FuncTcTree> updateTree(@RequestBody FuncTcTree tree){
         service.updateTree(tree);
         return service.getTree(tree.getProject());
@@ -46,6 +50,7 @@ public class IfTcTreeController {
 
     @ResponseBody
     @RequestMapping("/iftctree/nodeclick")
+    @CrossOrigin
     public List<FuncTcInfo> nodeClick(@RequestParam("id") int id){
         return service.nodeClick(id);
     }

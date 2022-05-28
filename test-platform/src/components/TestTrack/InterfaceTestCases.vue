@@ -19,7 +19,10 @@
             <span class="custom-tree-node" >
               <span
                   v-if="!data.isEdit"
-                  @dblclick="() => {data.isEdit = true;}"
+                  @dblclick="() => {
+                    if(data.label !== '全部用例'){
+                      data.isEdit = true;
+                    }}"
               >{{ node.label }}</span>
                  <el-input
                      size="mini"
@@ -186,7 +189,7 @@ export default {
     }
   },
   created(){
-    axios.get("http://192.168.0.1:9090/iftctree",{
+    axios.get("/api/iftctree",{
       params:{
         projectId:this.$store.state.project
       }
@@ -212,7 +215,7 @@ export default {
     project:function (nv,ov){
       this.param = nv
       // console.log(nv,ov)
-      axios.get("http://192.168.0.1:9090/iftctree",{
+      axios.get("/api/iftctree",{
         params:{
           projectId:this.param
         }
@@ -254,7 +257,7 @@ export default {
     },
     nodeLoad(){
 
-      axios.get("http://192.168.0.1:9090/iftctree/nodeclick",{
+      axios.get("/api/iftctree/nodeclick",{
         params:{
           id:nodeId
         }
@@ -291,13 +294,17 @@ export default {
       if (this.whetherEditNodeName) {
         // 调用后端修改nodeName的接口
         // 这里加判断是为了避免，双击后没修改nodeName也会调接口的情况
-        axios.post("http://192.168.0.1:9090/iftctree/update",JSON.parse(JSON.stringify(data)))
+        axios.post("/api/iftctree/update",JSON.parse(JSON.stringify(data)),
+            {headers:{
+                'Content-Type': 'application/json;charset=utf-8',
+                'Accept': 'application/json',
+              },withCredentials: true, },)
       }
       data.isEdit = !data.isEdit;
     },
 
     append(data) {
-      axios.get("http://192.168.0.1:9090/iftctree/add",{
+      axios.get("/api/iftctree/add",{
         params:{
           id:data.id,
           projectId:this.$store.state.project
@@ -310,7 +317,7 @@ export default {
     },
 
     remove(node, data) {
-      axios.get("http://192.168.0.1:9090/iftctree/del",{
+      axios.get("/api/iftctree/del",{
         params:{
           id:data.id,
           projectId:this.$store.state.project
@@ -344,7 +351,7 @@ export default {
     },
     //用例的增删
     tableAddrow(){
-      axios.get("http://192.168.0.1:9090/ifInfoAddDefault",{
+      axios.get("/api/ifInfoAddDefault",{
         params:{
           nodeId:nodeId
         }
@@ -353,7 +360,7 @@ export default {
       })
     },
     deleteRow(index, rows) {
-      axios.get("http://192.168.0.1:9090/ifInfoDelete", {
+      axios.get("/api/ifInfoDelete", {
         params:{
           id:rows[index].id,
           nodeId:nodeId
@@ -373,8 +380,16 @@ export default {
       let params = JSON.parse(JSON.stringify(this.$refs.dialog.form2))
       let detial = JSON.parse(JSON.stringify(this.$refs.dialog.gridData))
       // console.log(detial)
-      axios.post("http://192.168.0.1:9090/ifInfoUpdate",params)
-      axios.post("http://192.168.0.1:9090/ifdetialupdate",detial)
+      axios.post("/api/ifInfoUpdate",params,
+          {headers:{
+              'Content-Type': 'application/json;charset=utf-8',
+              'Accept': 'application/json',
+            },withCredentials: true, },)
+      axios.post("/api/ifdetialupdate",detial,
+          {headers:{
+          'Content-Type': 'application/json;charset=utf-8',
+          'Accept': 'application/json',
+        },withCredentials: true, },)
 
       this.nodeLoad()
 

@@ -46,11 +46,15 @@ export default {
     submitForm(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          axios.post("http://192.168.0.1:9090/login", {
+          axios.post("/api/login", {
               'name':this.form.name,
               'pswd':this.form.pswd
 
-          }).then(res=>{
+          },{headers:{
+              'Content-Type': 'application/json;charset=utf-8',
+              'Accept': 'application/json',
+            },withCredentials: true, },
+          ).then(res=>{
             if(JSON.parse(JSON.stringify(res.data)) === 1){
               sessionStorage.setItem('token',this.form.name)
               this.$store.dispatch("asynShow",this.form.name)

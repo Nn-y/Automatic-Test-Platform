@@ -19,7 +19,10 @@
             <span class="custom-tree-node" >
               <span
                   v-if="!data.isEdit"
-                  @dblclick="() => {data.isEdit = true;}"
+                  @dblclick="() => {
+                    if(data.label !== '全部用例'){
+                      data.isEdit = true;
+                    }}"
               >{{ node.label }}</span>
                  <el-input
                      size="mini"
@@ -188,7 +191,7 @@ export default {
     }
   },
   created(){
-    axios.get("http://192.168.0.1:9090/functctree",{
+    axios.get("/api/functctree",{
       params:{
         projectId:this.$store.state.project
       }
@@ -213,7 +216,7 @@ export default {
       this.param = nv
       // console.log(this.project)
       // console.log(nv,ov)
-      axios.get("http://192.168.0.1:9090/functctree",{
+      axios.get("/api/functctree",{
         params:{
           projectId:this.param
         }
@@ -255,7 +258,7 @@ export default {
     },
     nodeLoad(){
 
-      axios.get("http://192.168.0.1:9090/functctree/nodeclick",{
+      axios.get("/api/functctree/nodeclick",{
         params:{
           id:nodeId
         }
@@ -292,13 +295,17 @@ export default {
       if (this.whetherEditNodeName) {
         // 调用后端修改nodeName的接口
         // 这里加判断是为了避免，双击后没修改nodeName也会调接口的情况
-        axios.post("http://192.168.0.1:9090/functctree/update",JSON.parse(JSON.stringify(data)))
+        axios.post("/api/functctree/update",JSON.parse(JSON.stringify(data)),
+            {headers:{
+                'Content-Type': 'application/json;charset=utf-8',
+                'Accept': 'application/json',
+              },withCredentials: true, },)
       }
       data.isEdit = !data.isEdit;
     },
 
     append(data) {
-      axios.get("http://192.168.0.1:9090/functctree/add",{
+      axios.get("/api/functctree/add",{
         params:{
           id:data.id,
           projectId:this.$store.state.project
@@ -311,7 +318,7 @@ export default {
     },
 
     remove(node, data) {
-      axios.get("http://192.168.0.1:9090/functctree/del",{
+      axios.get("/api/functctree/del",{
         params:{
           id:data.id,
           projectId:this.$store.state.project
@@ -343,7 +350,7 @@ export default {
       )
     },
     tableAddrow(){
-      axios.get("http://192.168.0.1:9090/funcInfoAddDefault",{
+      axios.get("/api/funcInfoAddDefault",{
         params:{
           nodeId:nodeId
         }
@@ -354,7 +361,7 @@ export default {
     deleteRow(index, rows) {
       // let param = JSON.parse(JSON.stringify(rows[index]))
       // console.log(rows[index].id)
-      axios.get("http://192.168.0.1:9090/funcInfoDelete", {
+      axios.get("/api/funcInfoDelete", {
         params:{
           id:rows[index].id,
           nodeId:nodeId
@@ -373,8 +380,16 @@ export default {
       let params = JSON.parse(JSON.stringify(this.$refs.dialog.form2))
       let detial = JSON.parse(JSON.stringify(this.$refs.dialog.gridData))
       // console.log(detial)
-      axios.post("http://192.168.0.1:9090/funcInfoUpdate",params)
-      axios.post("http://192.168.0.1:9090/funcdetialupdate",detial)
+      axios.post("/api/funcInfoUpdate",params,
+          {headers:{
+              'Content-Type': 'application/json;charset=utf-8',
+              'Accept': 'application/json',
+            },withCredentials: true, },)
+      axios.post("/api/funcdetialupdate",detial,
+          {headers:{
+              'Content-Type': 'application/json;charset=utf-8',
+              'Accept': 'application/json',
+            },withCredentials: true, },)
 
       this.nodeLoad()
 

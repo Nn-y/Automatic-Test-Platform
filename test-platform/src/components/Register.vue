@@ -31,23 +31,24 @@ export default {
         callback(new Error('请输入用户名'));
       } else {
         if (this.form.name !== ''&& this.form.name.length <= 20) {
-          axios.get("http://192.168.0.1:9090/register/isexist",{
+          axios.get("/api/register/isexist",{
             params:{
               name:this.form.name
             }
           }).then(res=>{
             // console.log(typeof (res.data))
-            if(JSON.parse(JSON.stringify(res.data)) === 1 ){
+            if(res.data === 1 ){
+              console.log(res.data)
               callback(new Error('用户名已存在'));
             }else {
-              this.$refs.ruleForm.validateField('name');
+              // this.$refs.form.validateField('name');
               callback();
             }
           })
         }else {
           callback(new Error('用户名长度不能超过20个字符！'));
         }
-        callback();
+        // callback();
       }
     };
     let validatePass = (rule, value, callback) => {
@@ -57,7 +58,7 @@ export default {
         callback(new Error('密码不得超过20位'));
         }else {
           if (this.form.checkpass !== '') {
-            this.$refs.ruleForm.validateField('checkpass');
+            this.$refs.form.validateField('checkpass');
         }
         callback();
       }
@@ -96,10 +97,10 @@ export default {
 
   methods:{
     submitForm(formName) {
-      console.log('111')
+      // console.log('111')
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          axios.get("http://192.168.0.1:9090/register",{
+          axios.get("/api/register",{
             params:{
               name:this.form.name,
               pswd:this.form.pswd

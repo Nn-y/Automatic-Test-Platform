@@ -8,10 +8,7 @@ import com.testplatform.platformbackend.service.IfTest.RequestParamsService;
 import org.dom4j.DocumentException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -28,6 +25,7 @@ public class JmeterController {
 
     @ResponseBody
     @RequestMapping("/getrequest")
+    @CrossOrigin
     public void getRequest(@RequestParam("id") int id) throws IOException, DocumentException {
         File log = new File("log.xml");
         FileWriter fileWriter = new FileWriter(log);
@@ -42,6 +40,7 @@ public class JmeterController {
 
     @ResponseBody
     @RequestMapping("/getresponse")
+    @CrossOrigin
     public List<String> getResponse(@RequestParam("content") String content) throws DocumentException, IOException {
         RunTest runTest = new RunTest();
 //        System.out.println(runTest.getResponse(content));
@@ -50,6 +49,7 @@ public class JmeterController {
 
     @ResponseBody
     @RequestMapping("/getresponse/getbrief")
+    @CrossOrigin
     public List<String> getBrief() throws FileNotFoundException, DocumentException {
         RunTest runTest = new RunTest();
         return runTest.getBrief();

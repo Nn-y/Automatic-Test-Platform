@@ -266,14 +266,14 @@ export default {
     msg:Number
   },
   created() {
-    axios.get("http://192.168.0.1:9090/iflistdetial",{
+    axios.get("/api/iflistdetial",{
       params:{
         id:this.msg
       }
     }).then(res=>{
         this.form = res.data
     }),
-        axios.get("http://192.168.0.1:9090/getparams",{
+        axios.get("/api/getparams",{
           params:{
             id:this.msg
           }
@@ -321,7 +321,11 @@ export default {
   methods: {
     save(){
       let param = JSON.parse(JSON.stringify(this.form))
-      axios.post("http://192.168.0.1:9090/iflistdetial/save",param)
+      axios.post("/api/iflistdetial/save",param,
+          {headers:{
+              'Content-Type': 'application/json;charset=utf-8',
+              'Accept': 'application/json',
+            },withCredentials: true, },)
 
       this.$message({
         message: '保存成功！',
@@ -329,12 +333,12 @@ export default {
       });
     },
     execute(){
-      axios.get("http://192.168.0.1:9090/getrequest",{
+      axios.get("/api/getrequest",{
         params:{
           id:this.msg
         }
       }).then(res=>{
-        axios.get("http://192.168.0.1:9090/getresponse", {
+        axios.get("/api/getresponse", {
           params: {
             content: 'responseHeader'
           }
@@ -342,7 +346,7 @@ export default {
           // console.log(JSON.parse(JSON.stringify(res.data)))
           this.responseheader = res.data[0]
         }),
-        axios.get("http://192.168.0.1:9090/getresponse", {
+        axios.get("/api/getresponse", {
           params: {
             content: 'responseData'
           }
@@ -350,7 +354,7 @@ export default {
           // console.log(JSON.parse(JSON.stringify(res.data)))
           this.responsedata = res.data[0]
         }),
-        axios.get("http://192.168.0.1:9090/getresponse/getbrief").then(res=>{
+        axios.get("/api/getresponse/getbrief").then(res=>{
           console.log(res.data[0])
           this.code = res.data[0]
           this.time = res.data[1]+' ms'
@@ -392,11 +396,15 @@ export default {
       row.flag1=false
       row.flag2=false
       row.flag3=false
-      axios.post("http://192.168.0.1:9090/updateparams",JSON.parse(JSON.stringify(row)))
+      axios.post("/api/updateparams",JSON.parse(JSON.stringify(row)),
+          {headers:{
+              'Content-Type': 'application/json;charset=utf-8',
+              'Accept': 'application/json',
+            },withCredentials: true, },)
       // console.log(JSON.parse(JSON.stringify(row)))
     },
     addRow(){
-      axios.get("http://192.168.0.1:9090/addparams",{
+      axios.get("/api/addparams",{
         params:{
           id:this.msg
         }
@@ -405,7 +413,11 @@ export default {
       })
     },
     deleteRow(index,rows){
-      axios.post("http://192.168.0.1:9090/deleteparams",JSON.parse(JSON.stringify(rows[index]))).then(res=>{
+      axios.post("/api/deleteparams",JSON.parse(JSON.stringify(rows[index])),
+          {headers:{
+              'Content-Type': 'application/json;charset=utf-8',
+              'Accept': 'application/json',
+            },withCredentials: true, },).then(res=>{
         this.paramsData = res.data
       })
     }

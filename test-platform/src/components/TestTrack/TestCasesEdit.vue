@@ -156,7 +156,7 @@ export default {
   methods:{
 
     funcLoad(){
-      axios.get("http://192.168.0.1:9090/functionInfo/one",{
+      axios.get("/api/functionInfo/one",{
         params:{
           id:this.msg
         }
@@ -164,7 +164,7 @@ export default {
         this.form2 = res.data
         param = this.form2.id
         // console.log(param)
-        axios.get("http://192.168.0.1:9090/funcdetial",{
+        axios.get("/api/funcdetial",{
           params:{
             id:param
           }
@@ -173,7 +173,7 @@ export default {
           this.gridData = res.data
         })
 
-        axios.get("http://192.168.0.1:9090/funcpre",{
+        axios.get("/api/funcpre",{
           params:{
             id:param
           }
@@ -185,7 +185,7 @@ export default {
       })
     },
     ifLoad(){
-      axios.get("http://192.168.0.1:9090/interfaceInfo/one",{
+      axios.get("/api/interfaceInfo/one",{
         params:{
           id:this.msg
         }
@@ -193,7 +193,7 @@ export default {
         this.form2 = res.data
         param = this.form2.id
         // console.log(param)
-        axios.get("http://192.168.0.1:9090/ifdetial",{
+        axios.get("/api/ifdetial",{
           params:{
             id:param
           }
@@ -202,7 +202,7 @@ export default {
           this.gridData = res.data
         })
 
-        axios.get("http://192.168.0.1:9090/ifpre",{
+        axios.get("/api/ifpre",{
           params:{
             id:param
           }
@@ -236,7 +236,7 @@ export default {
     },
     addRow(){
       if(this.type === 0){
-        axios.get("http://192.168.0.1:9090/funcaddrow",{
+        axios.get("/api/funcaddrow",{
           params:{
             id:param
           }
@@ -246,7 +246,7 @@ export default {
           // console.log(param)
         })
       }else{
-        axios.get("http://192.168.0.1:9090/ifaddrow",{
+        axios.get("/api/ifaddrow",{
           params:{
             id:param
           }
@@ -260,11 +260,19 @@ export default {
     },
     deleteRow(index, rows) {
       if(this.type === 0){
-        axios.post("http://192.168.0.1:9090/funcdeleterow",JSON.parse(JSON.stringify(rows[index]))).then(res =>{
+        axios.post("/api/funcdeleterow",JSON.parse(JSON.stringify(rows[index])),
+            {headers:{
+                'Content-Type': 'application/json;charset=utf-8',
+                'Accept': 'application/json',
+              },withCredentials: true, },).then(res =>{
           this.gridData = res.data
         })
       }else {
-        axios.post("http://192.168.0.1:9090/ifdeleterow",JSON.parse(JSON.stringify(rows[index]))).then(res =>{
+        axios.post("/api/ifdeleterow",JSON.parse(JSON.stringify(rows[index])),
+            {headers:{
+                'Content-Type': 'application/json;charset=utf-8',
+                'Accept': 'application/json',
+              },withCredentials: true, },).then(res =>{
           this.gridData = res.data
         })
       }

@@ -84,7 +84,7 @@ export default {
 
   methods:{
     load(){
-      axios.get("http://192.168.0.1:9090/getprojects",{
+      axios.get("/api/getprojects",{
         params:{
           user:this.$store.state.user
         }
@@ -98,7 +98,7 @@ export default {
           this.$store.dispatch("asynChange",this.projectId)
         }else{
           this.projectId = this.$store.state.project
-          axios.get("http://192.168.0.1:9090/getproject",{
+          axios.get("/api/getproject",{
             params:{
               projectId:this.projectId
             }

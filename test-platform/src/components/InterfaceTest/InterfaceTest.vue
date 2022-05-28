@@ -36,7 +36,10 @@
             <span class="custom-tree-node" >
               <span
                   v-if="!data.isEdit"
-                  @dblclick="() => { data.isEdit = true;}"
+                  @dblclick="() => {
+                    if(data.label !== '全部用例'){
+                      data.isEdit = true;
+                    }}"
               >{{ node.label }}</span>
                  <el-input
                      size="mini"
@@ -176,7 +179,7 @@ export default {
     projectChange:Number
   },
   created(){
-    axios.get("http://192.168.0.1:9090/iftesttree",{
+    axios.get("/api/iftesttree",{
       params:{
         projectId:this.$store.state.project
       }
@@ -197,14 +200,14 @@ export default {
     this.load()
   },
   watch:{
+    projectChange:function (nv,ov){
+      this.load()
+    },
     editableTabsValue:function (nv,ov){
       if(nv === "0"){
         this.listLoad()
       }
     },
-    projectChange:function (nv,ov){
-      this.load()
-    }
   },
 
   data(){
@@ -239,7 +242,7 @@ export default {
   },
   methods: {
     load(){
-      axios.get("http://192.168.0.1:9090/getprojects",{
+      axios.get("/api/getprojects",{
         params:{
           user:this.$store.state.user
         }
@@ -248,7 +251,7 @@ export default {
         this.options = res.data
         // console.log(res.data)
         this.projectId = this.$store.state.project
-        axios.get("http://192.168.0.1:9090/getproject",{
+        axios.get("/api/getproject",{
           params:{
             projectId:this.projectId
           }
@@ -261,7 +264,7 @@ export default {
       // this.projectName = this.project
       this.projectId = value
       this.$store.dispatch("asynChange",this.projectId)
-      axios.get("http://192.168.0.1:9090/iftesttree",{
+      axios.get("/api/iftesttree",{
         params:{
           projectId:this.projectId
         }
@@ -303,7 +306,7 @@ export default {
     },
     nodeLoad(){
 
-      axios.get("http://192.168.0.1:9090/iftesttree/nodeclick",{
+      axios.get("/api/iftesttree/nodeclick",{
         params:{
           id:nodeId
         }
@@ -315,7 +318,7 @@ export default {
       this.editableTabsValue = "0"
     },
     listLoad(){
-      axios.get("http://192.168.0.1:9090/iftesttree/nodeclick",{
+      axios.get("/api/iftesttree/nodeclick",{
         params:{
           id:nodeId
         }
@@ -347,13 +350,17 @@ export default {
       if (this.whetherEditNodeName) {
         // 调用后端修改nodeName的接口
         // 这里加判断是为了避免，双击后没修改nodeName也会调接口的情况
-        axios.post("http://192.168.0.1:9090/iftesttree/update",JSON.parse(JSON.stringify(data)))
+        axios.post("/api/iftesttree/update",JSON.parse(JSON.stringify(data)),
+            {headers:{
+                'Content-Type': 'application/json;charset=utf-8',
+                'Accept': 'application/json',
+              },withCredentials: true, },)
       }
       data.isEdit = !data.isEdit;
     },
 
     append(data) {
-      axios.get("http://192.168.0.1:9090/iftesttree/add",{
+      axios.get("/api/iftesttree/add",{
         params:{
           id:data.id,
           projectId:this.$store.state.project
@@ -366,7 +373,7 @@ export default {
     },
 
     remove(node, data) {
-      axios.get("http://192.168.0.1:9090/iftesttree/del",{
+      axios.get("/api/iftesttree/del",{
         params:{
           id:data.id,
           projectId:this.$store.state.project
@@ -402,7 +409,7 @@ export default {
       )
     },
     tableAddrow(){
-      axios.get("http://192.168.0.1:9090/ifListAddDefault",{
+      axios.get("/api/ifListAddDefault",{
         params:{
           nodeId:nodeId
         }
@@ -411,7 +418,7 @@ export default {
       })
     },
     deleteRow(index, rows) {
-      axios.get("http://192.168.0.1:9090/ifListDelete", {
+      axios.get("/api/ifListDelete", {
         params:{
           id:rows[index].id,
           nodeId:nodeId
