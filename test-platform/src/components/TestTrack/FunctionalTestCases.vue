@@ -216,23 +216,28 @@ export default {
       this.param = nv
       // console.log(this.project)
       // console.log(nv,ov)
-      axios.get("/api/functctree",{
-        params:{
-          projectId:this.param
-        }
-      }).then(res =>{
-        nodeId = res.data[0].id
-        this.currentNode = nodeId
-        this.$nextTick(function () {
-          this.$nextTick(() => {
-            this.$refs.tree.setCurrentKey(this.currentNode);
-          });
-        });
+      if(this.param === 0){
         this.data = []
-        this.tree_init(res.data,this.data)
-        // console.log(res.data[0].id)
-        this.nodeLoad()
-      })
+      }else {
+        axios.get("/api/functctree",{
+          params:{
+            projectId:this.param
+          }
+        }).then(res =>{
+          nodeId = res.data[0].id
+          this.currentNode = nodeId
+          this.$nextTick(function () {
+            this.$nextTick(() => {
+              this.$refs.tree.setCurrentKey(this.currentNode);
+            });
+          });
+          this.data = []
+          this.tree_init(res.data,this.data)
+          // console.log(res.data[0].id)
+          this.nodeLoad()
+        })
+      }
+
     }
   },
   methods: {
@@ -321,12 +326,25 @@ export default {
       axios.get("/api/functctree/del",{
         params:{
           id:data.id,
-          projectId:this.$store.state.project
         }
       }).
       then(res =>{
-        this.data = []
-        this.tree_init(res.data,this.data)
+        nodeId = res.data //删除子节点后高亮父节点
+        axios.get("/api/functctree",{
+          params:{
+            projectId:this.$store.state.project
+          }
+        }).then(res =>{
+          this.data = []
+          this.tree_init(res.data,this.data)
+          this.currentNode = nodeId
+          this.$nextTick(function () {
+            this.$nextTick(() => {
+              this.$refs.tree.setCurrentKey(this.currentNode);
+            });
+          });
+          this.nodeLoad()
+        })
       })
     },
     handleNodeClick(data) {
@@ -342,21 +360,24 @@ export default {
                 style="padding:3px;margin-left:8px"
                 size="mini"
                 //加入点击事件---------
-                onClick={
-                  this.tableAddrow
-                }
-                //---------------------
-            >添加</el-button></div>
+                onClick={this.tableAddrow}
+            >
+              添加</el-button></div>
       )
     },
     tableAddrow(){
-      axios.get("/api/funcInfoAddDefault",{
-        params:{
-          nodeId:nodeId
-        }
-      }).then(res =>{
-        this.tableData = res.data
-      })
+      if(this.$store.state.project === 0){
+        alert("请先添加项目！")
+      }else {
+        axios.get("/api/funcInfoAddDefault",{
+          params:{
+            nodeId:nodeId
+          }
+        }).then(res =>{
+          this.tableData = res.data
+        })
+      }
+
     },
     deleteRow(index, rows) {
       // let param = JSON.parse(JSON.stringify(rows[index]))

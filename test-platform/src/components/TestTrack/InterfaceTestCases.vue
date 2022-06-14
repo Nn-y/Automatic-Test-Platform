@@ -214,24 +214,28 @@ export default {
   watch:{
     project:function (nv,ov){
       this.param = nv
-      // console.log(nv,ov)
-      axios.get("/api/iftctree",{
-        params:{
-          projectId:this.param
-        }
-      }).then(res =>{
-        nodeId = res.data[0].id
-        this.currentNode = nodeId
-        this.$nextTick(function () {
-          this.$nextTick(() => {
-            this.$refs.tree.setCurrentKey(this.currentNode);
-          });
-        });
+      if(this.param === 0) {
         this.data = []
-        this.tree_init(res.data,this.data)
-        // console.log(res.data[0].id)
-        this.nodeLoad()
-      })
+      }else {
+        axios.get("/api/iftctree",{
+          params:{
+            projectId:this.param
+          }
+        }).then(res =>{
+          nodeId = res.data[0].id
+          this.currentNode = nodeId
+          this.$nextTick(function () {
+            this.$nextTick(() => {
+              this.$refs.tree.setCurrentKey(this.currentNode);
+            });
+          });
+          this.data = []
+          this.tree_init(res.data,this.data)
+          // console.log(res.data[0].id)
+          this.nodeLoad()
+        })
+      }
+
     }
   },
   methods: {
@@ -320,12 +324,26 @@ export default {
       axios.get("/api/iftctree/del",{
         params:{
           id:data.id,
-          projectId:this.$store.state.project
+          // projectId:this.$store.state.project
         }
       }).
       then(res =>{
-        this.data = []
-        this.tree_init(res.data,this.data)
+        nodeId = res.data //删除子节点后高亮父节点
+        axios.get("/api/iftctree",{
+          params:{
+            projectId:this.$store.state.project
+          }
+        }).then(res =>{
+          this.data = []
+          this.tree_init(res.data,this.data)
+          this.currentNode = nodeId
+          this.$nextTick(function () {
+            this.$nextTick(() => {
+              this.$refs.tree.setCurrentKey(this.currentNode);
+            });
+          });
+          this.nodeLoad()
+        })
       })
     },
     handleNodeClick(data) {
@@ -351,13 +369,17 @@ export default {
     },
     //用例的增删
     tableAddrow(){
-      axios.get("/api/ifInfoAddDefault",{
-        params:{
-          nodeId:nodeId
-        }
-      }).then(res =>{
-        this.tableData = res.data
-      })
+      if(this.$store.state.project === 0){
+        alert("请先添加项目！")
+      }else {
+        axios.get("/api/ifInfoAddDefault", {
+          params: {
+            nodeId: nodeId
+          }
+        }).then(res => {
+          this.tableData = res.data
+        })
+      }
     },
     deleteRow(index, rows) {
       axios.get("/api/ifInfoDelete", {

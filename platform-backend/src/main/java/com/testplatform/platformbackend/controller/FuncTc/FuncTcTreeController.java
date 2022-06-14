@@ -34,9 +34,8 @@ public class FuncTcTreeController {
     @ResponseBody
     @RequestMapping("/functctree/del")
     @CrossOrigin
-    public List<FuncTcTree> deleteTree(@RequestParam Map<String,String> map){
-        service.deleteTree(Integer.parseInt(map.get("id")));
-        return service.getTree(Integer.parseInt(map.get("projectId")));
+    public int deleteTree(@RequestParam("id") int id){
+        return service.deleteTree(id);
     }
 
     @ResponseBody

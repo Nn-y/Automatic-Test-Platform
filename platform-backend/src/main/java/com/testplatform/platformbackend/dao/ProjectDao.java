@@ -36,7 +36,7 @@ public class ProjectDao {
         jdbcTemplate.update(sql3,projectId);
         String sql4 = "insert into interface_tree(pid,label,project) values(0,'全部用例',?)";
         jdbcTemplate.update(sql4,projectId);
-        String sql5 = "insert into if_tree(pid,label,project) values(0,'全部用例',?)";
+        String sql5 = "insert into if_tree(pid,label,project) values(0,'全部接口',?)";
         return jdbcTemplate.update(sql5,projectId);
     }
 

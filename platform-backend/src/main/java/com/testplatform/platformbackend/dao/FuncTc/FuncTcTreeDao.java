@@ -27,10 +27,15 @@ public class FuncTcTreeDao {
         String sql = "insert into function_tree(pid,label,project) values(?,'无',?)";
         return jdbcTemplate.update(sql,pid,projectId);
     }
-
+    //删除节点的同时，将节点下的数据移至其父节点
     public int deleteTree(int id){
-        String sql = "delete from function_tree where id = ?";
-        return jdbcTemplate.update(sql,id);
+        String sql1 = "select pid from function_tree where id = ?" ;
+        int category = jdbcTemplate.queryForObject(sql1,Integer.class,id);
+        String sql2 = "update function_tc_information set category = ? where category = ?";
+        jdbcTemplate.update(sql2,category,id);
+        String sql3 = "delete from function_tree where id = ?";
+        jdbcTemplate.update(sql3,id);
+        return category;
     }
 
     public int updateTree(FuncTcTree tree){

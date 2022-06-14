@@ -27,10 +27,15 @@ public class IfTestTreeDao {
         String sql = "insert into if_tree(pid,label,project) values(?,'无',?)";
         return jdbcTemplate.update(sql,pid,projectId);
     }
-
+    //删除节点的同时，将节点下的数据移至其父节点
     public int deleteTree(int id){
-        String sql = "delete from if_tree where id = ?";
-        return jdbcTemplate.update(sql,id);
+        String sql1 = "select pid from if_tree where id = ?";
+        int category = jdbcTemplate.queryForObject(sql1,Integer.class,id);
+        String sql2 = "update if_list set category = ? where category = ?";
+        jdbcTemplate.update(sql2,category,id);
+        String sql3 = "delete from if_tree where id = ?";
+        jdbcTemplate.update(sql3,id);
+        return category;
     }
 
     public int updateTree(FuncTcTree tree){

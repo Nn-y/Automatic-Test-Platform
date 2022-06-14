@@ -37,7 +37,7 @@
               <span
                   v-if="!data.isEdit"
                   @dblclick="() => {
-                    if(data.label !== '全部用例'){
+                    if(data.label !== '全部接口'){
                       data.isEdit = true;
                     }}"
               >{{ node.label }}</span>
@@ -64,7 +64,7 @@
                                   @confirm="remove(node, data)"
                                   @cancel="cancelEvent">
                     <template #reference>
-                      <el-icon v-if="node.label !== '全部用例'"
+                      <el-icon v-if="node.label !== '全部接口'"
                                color="#409EFC"
                                class="no-inherit">
                     <delete />
@@ -88,17 +88,17 @@
         >
           <el-tab-pane label="接口列表" :name="0">
             <el-scrollbar>
-              <el-table :data="tableData" stripe height="calc(100vh - 170px)"  >
+              <el-table :data="tableData" stripe height="calc(100vh - 170px)">
                 <el-table-column prop="id" label="ID" width="120" />
                 <el-table-column prop="name" label="接口名称" width="120" />
                 <el-table-column prop="type" label="请求类型" width="120" />
-                <el-table-column prop="user" label="责任人" width="100"/>
+                <el-table-column prop="user" label="责任人" width="120"/>
                 <el-table-column prop="tag" label="标签" width="120"/>
-                <el-table-column prop="version" label="版本" width="120"/>
+<!--                <el-table-column prop="version" label="版本" width="120"/>-->
                 <el-table-column prop="utime" label="更新时间" width="180"/>
                 <el-table-column prop="ctime" label="创建时间" width="180"/>
                 <el-table-column prop="status" label="接口状态" width="120"/>
-                <el-table-column fixed="right" label="操作" width="120" :render-header="renderHeader">
+                <el-table-column fixed="right" label="操作" width="180" :render-header="renderHeader">
                   <template v-slot:default="scope">
                     <el-button type="primary" circle  @click="addTab(scope.$index)">
                       <el-icon style="vertical-align: middle;">
@@ -179,24 +179,6 @@ export default {
     projectChange:Number
   },
   created(){
-    axios.get("/api/iftesttree",{
-      params:{
-        projectId:this.$store.state.project
-      }
-    }).then(res =>{
-      nodeId = res.data[0].id
-      this.currentNode = nodeId
-      this.$nextTick(function () {
-        this.$nextTick(() => {
-          this.$refs.tree.setCurrentKey(this.currentNode);
-        });
-      });
-      this.data = []
-      this.tree_init(res.data,this.data)
-      this.nodeLoad()
-    })
-  },
-  mounted() {
     this.load()
   },
   watch:{
@@ -250,15 +232,51 @@ export default {
         this.options = []
         this.options = res.data
         // console.log(res.data)
-        this.projectId = this.$store.state.project
-        axios.get("/api/getproject",{
-          params:{
-            projectId:this.projectId
-          }
-        }).then(res=>{
-          this.project = res.data
-        })
+        if(this.options.length === 0) {
+          this.projectId = 0
+          this.$store.dispatch("asynChange", this.projectId)
+          this.project = ''
+        }else if(this.$store.state.project === 0){//默认显示第一个项目,并修改projectId
+          // console.log(this.options[0])
+          this.project = this.options[0].name
+          this.projectId = this.options[0].id
+          this.$store.dispatch("asynChange",this.projectId)
+          this.treeLoad()
+        }else {
+          this.projectId = this.$store.state.project
+          axios.get("/api/getproject",{
+            params:{
+              projectId:this.projectId
+            }
+          }).then(res=>{
+            this.project = res.data
+          })
+        }
+        this.treeLoad()
       })
+    },
+    treeLoad(){
+      if(this.$store.state.project === 0){
+        this.data = []
+      }else {
+        axios.get("/api/iftesttree",{
+          params:{
+            projectId:this.$store.state.project
+          }
+        }).then(res =>{
+          nodeId = res.data[0].id
+          this.currentNode = nodeId
+          this.$nextTick(function () {
+            this.$nextTick(() => {
+              this.$refs.tree.setCurrentKey(this.currentNode);
+            });
+          });
+          this.data = []
+          this.tree_init(res.data,this.data)
+          this.nodeLoad()
+        })
+      }
+
     },
     getProject(value){
       // this.projectName = this.project
@@ -371,17 +389,31 @@ export default {
         this.tree_init(res.data,this.data)
       })
     },
-
+//删除分类栏节点
     remove(node, data) {
       axios.get("/api/iftesttree/del",{
         params:{
           id:data.id,
-          projectId:this.$store.state.project
+          // projectId:this.$store.state.project
         }
       }).
       then(res =>{
-        this.data = []
-        this.tree_init(res.data,this.data)
+        nodeId = res.data //删除子节点后高亮父节点
+        axios.get("/api/iftesttree",{
+          params:{
+            projectId:this.$store.state.project
+          }
+        }).then(res =>{
+          this.data = []
+          this.tree_init(res.data,this.data)
+          this.currentNode = nodeId
+          this.$nextTick(function () {
+            this.$nextTick(() => {
+              this.$refs.tree.setCurrentKey(this.currentNode);
+            });
+          });
+          this.nodeLoad()
+        })
       })
     },
     handleNodeClick(data) {
@@ -409,13 +441,17 @@ export default {
       )
     },
     tableAddrow(){
-      axios.get("/api/ifListAddDefault",{
-        params:{
-          nodeId:nodeId
-        }
-      }).then(res =>{
-        this.tableData = res.data
-      })
+      if(this.$store.state.project === 0){
+        alert("请先添加项目！")
+      }else {
+        axios.get("/api/ifListAddDefault", {
+          params: {
+            nodeId: nodeId
+          }
+        }).then(res => {
+          this.tableData = res.data
+        })
+      }
     },
     deleteRow(index, rows) {
       axios.get("/api/ifListDelete", {

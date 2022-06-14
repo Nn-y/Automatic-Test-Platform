@@ -91,11 +91,15 @@ export default {
       }).then(res =>{
         this.options = []
         this.options = res.data
-        if(this.$store.state.project === 0){
-          console.log(this.options[0].id)
+        if(this.$store.state.project === 0){//默认显示第一个项目
+          // console.log(this.options[0].id)
           this.project = this.options[0].name
           this.projectId = this.options[0].id
           this.$store.dispatch("asynChange",this.projectId)
+        }else if(this.options.length === 0){//本来有项目然后全部删除的情况
+          this.projectId = 0
+          this.$store.dispatch("asynChange",this.projectId)
+          this.project =''
         }else{
           this.projectId = this.$store.state.project
           axios.get("/api/getproject",{
